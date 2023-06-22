@@ -471,11 +471,11 @@ def Aug(train_data, prop_keep, n_epoch = 30, batch_size = 256,  n_T = 200,  devi
 
 
   print("augmentation")
-  ddpm = ddpm.to("cpu") #remove for zuber
+  #ddpm = ddpm.to("cpu") #remove for zuber
   ddpm.eval()
   with torch.no_grad():
       n_sample = 2
-      x_gen, x_gen_store = ddpm.sample(n_gen, (1, 28, 28), "cpu", label=[0],guide_w=0.5) #set to "cuda:0" for zuber
+      x_gen, x_gen_store = ddpm.sample(n_gen, (1, 28, 28), "cuda:0", label=[0],guide_w=0.5) #set to "cuda:0" for zuber
   plt.imshow(x_gen[0].reshape(28,28).cpu(), cmap="gray")
   plt.show()
 
