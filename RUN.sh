@@ -12,6 +12,8 @@ pip install copy logging random math matplotlib matplotlib.pyplot numplotnumpy==
 pip install  torch scikit-learn==0.24.2 torchvision==0.9.1 tqdm==4.61.1 torch-utils-data==0.2.0 
 pip install imbalanced-learn==0.8.0 seaborn==0.11.1 
 pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+pip install "git+https://github.com/tqdm/tqdm.git@devel#egg=tqdm"
+
 # Change to the project directory
 cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST
 
