@@ -8,7 +8,7 @@ virtualenv -p python3 venv
 source venv/bin/activate
 
 # Install required packages
-pip install copy logging random math matplotlib==3.4.2 numpy==1.19.5 pandas==1.3.0 seaborn==0.11.1 scikit-learn==0.24.2 torch==1.8.1 torchvision==0.9.1 tqdm==4.61.1 torch-utils-data==0.2.0 imbalanced-learn==0.8.0
+pip install copy logging random math matplotlib numpy==1.19.5 pandas==1.3.0 seaborn==0.11.1 scikit-learn==0.24.2 torch==1.8.1 torchvision==0.9.1 tqdm==4.61.1 torch-utils-data==0.2.0 imbalanced-learn==0.8.0
 
 # Change to the project directory
 cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST
