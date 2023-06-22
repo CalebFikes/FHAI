@@ -5,4 +5,4 @@
 
 
 cd /local/scratch/cfikes/FHAI
-python Experiment 6-22.py
+python Experiment_6-22.py
