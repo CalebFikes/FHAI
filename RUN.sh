@@ -22,5 +22,6 @@ $PYTHON_INTERPRETER -m pipreqs --force .
 # Install required packages
 $PYTHON_INTERPRETER -m pip install --no-index -r requirements.txt
 
+cat requirements.txt
 # Run the Python script
 $PYTHON_INTERPRETER $PROJECT_DIR/Experiment_6-22.py
