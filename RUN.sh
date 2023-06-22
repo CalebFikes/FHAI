@@ -4,6 +4,5 @@
 #SBATCH --gres=gpu:1
 
 
-cd /path/to/working/directory/
-source venv/bin/activate
+cd /local/scratch/cfikes/FHAI
 python Experiment 6-22.py
