@@ -1,3 +1,8 @@
+import os
+
+os.system(cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST)
+os.system(pip install --no-index -r requirements.txt)
+
 import copy
 import logging
 import random
@@ -24,7 +29,6 @@ import torch.utils.data as data_utils
 from imblearn.over_sampling import SMOTE
 from torch.utils.data import Dataset
 
-import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_LAUNCH_BLOCKING"]="1"
 
