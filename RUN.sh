@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=slurmtest
+#SBATCH --job-name=FHAI
 #SBATCH --output=out_slurmtest
 #SBATCH --gres=gpu:1
 
