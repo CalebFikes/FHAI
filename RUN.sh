@@ -4,5 +4,5 @@
 #SBATCH --gres=gpu:1
 
 
-cd /local/scratch/cfikes/FHAI
+cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST
 python Experiment_6-22.py
