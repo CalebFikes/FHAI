@@ -5,4 +5,4 @@
 
 
 cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST
-python Experiment_6-22.py
+python3.8 Experiment_6-22.py

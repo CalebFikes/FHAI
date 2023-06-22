@@ -20,6 +20,9 @@ from torchvision.datasets import MNIST
 from torchvision.utils import save_image, make_grid
 from tqdm import tqdm
 from tqdm.notebook import tqdm
+import torch.utils.data as data_utils
+from imblearn.over_sampling import SMOTE
+from torch.utils.data import Dataset
 
 import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
@@ -430,16 +433,6 @@ def Aug(train_data, prop_keep, n_epoch = 30, batch_size = 256,  n_T = 200,  devi
   ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
   ddpm.to(device)
 
-  # optionally load a model
-  # ddpm.load_state_dict(torch.load("./data/diffusion_outputs/ddpm_unet01_mnist_9.pth"))
-
-  tf = transforms.Compose([transforms.ToTensor()]) # mnist is already normalised 0 to 1
-
-  # Manually create imbalanced MNIST here]
-  train.targets = train_data.targets.type(torch.float)
-  train.targets[train.targets==2] = 0   # needs to replace labels
-  train.targets[train.targets==7] = 1
-  train.targets.unique(return_counts=True)
   dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
   optim = torch.optim.Adam(ddpm.parameters(), lr=lrate)
@@ -479,7 +472,23 @@ def Aug(train_data, prop_keep, n_epoch = 30, batch_size = 256,  n_T = 200,  devi
   plt.imshow(x_gen[0].reshape(28,28).cpu(), cmap="gray")
   plt.show()
 
+  train_data.data = torch.cat()
 
   return x_gen
 
+def Aug_SMOTE(train):
+    """
+    require torch.dataset object
+    """
+    smote = SMOTE()
+    X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets) # smote the dataset (must flatten to 2d first)
+
+    X = np.reshape(X, (len(X), 28, 28)) # reshape X to 3d
+
+    X_tensor = torch.from_numpy(X).view(len(X), 28, 28).float().requires_grad_(True) #.to(device) # push X to GPU and reshape
+    y_tensor = torch.from_numpy(y).type(torch.LongTensor) #.to(device)
+
+    return X_tensor, y_tensor
+
 new_x = Aug(train, .5, n_epoch = 1)
+
