@@ -1,7 +1,7 @@
 import os
 
-os.system(cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST)
-os.system(pip install --no-index -r requirements.txt)
+os.system("cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST")
+os.system("pip install --no-index -r requirements.txt")
 
 import copy
 import logging
