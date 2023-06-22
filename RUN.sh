@@ -13,6 +13,8 @@ pip install  torch scikit-learn==0.24.2 torchvision==0.9.1 tqdm==4.61.1 torch-ut
 pip install imbalanced-learn==0.8.0 seaborn==0.11.1 
 pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 pip install "git+https://github.com/tqdm/tqdm.git@devel#egg=tqdm"
+pip install --upgrade jupyter
+pip install --upgrade ipywidgets
 
 # Change to the project directory
 cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST
