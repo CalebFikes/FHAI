@@ -494,7 +494,7 @@ def Aug_SMOTE(train):
 
     return X_tensor, y_tensor
 
-new_x = Aug(train, .5, n_epoch = 1)
-#new_y = Aug_SMOTE(train)
-print(new_x.shape)
-#print(new_y.shape)
+#new_x = Aug(train, .5, n_epoch = 1)
+new_y = Aug_SMOTE(train)
+#print(new_x.shape)
+print(new_y.shape)

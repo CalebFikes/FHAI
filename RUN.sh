@@ -20,4 +20,4 @@ pip install --upgrade ipywidgets
 cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST
 
 # Run the Python script
-python3.8 Experiment_6-22.py
+CUDA_VISIBLE_DEVICES=1 python3.8 Experiment_6-22.py
