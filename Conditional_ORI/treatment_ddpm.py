@@ -336,6 +336,8 @@ if __name__ == "__main__":
     dataloader = torch.utils.data.DataLoader(EHR_train, batch_size=batch_size, drop_last=True, shuffle=True)
     ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=2), \
                 betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
+    total_params = sum(p.numel() for p in ddpm.parameters())
+    print(f"Number of parameters: {total_params}")
     ddpm.to(device)
 
     # # optionally load a model
