@@ -476,7 +476,7 @@ def Aug(train_data, prop_keep, n_epoch = 30, batch_size = 256,  n_T = 200,  devi
   plt.imshow(x_gen[0].reshape(28,28).cpu(), cmap="gray")
   plt.show()
 
-  train_data.data = torch.cat()
+  #train_data.data = torch.cat()
 
   return x_gen
 
