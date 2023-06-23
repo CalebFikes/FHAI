@@ -17,7 +17,7 @@ pip install --upgrade jupyter
 pip install --upgrade ipywidgets
 
 # Change to the project directory
-cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST
+cd /local/scratch/cfikes/FHAI_3/Conditional_ORI
 
 # Run the Python script
-python3.8 Experiment_6-22.py
+python3.8 treatment_ddpm.py
