@@ -19,8 +19,8 @@ pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f ht
 pip install "git+https://github.com/tqdm/tqdm.git@devel#egg=tqdm"
 pip install --upgrade jupyter
 pip install --upgrade ipywidgets
-pip install tensorboard torchmetrics
-tensorboard --logdir {'/local/scratch/cfikes/FHAI_3/Conditional_MNIST/logs/'}  --host localhost # REPLACE THE STRING IN BRACKETS WITH PATH TO STORE LOGS.
+pip install  torchmetrics
+#tensorboard --logdir {'/local/scratch/cfikes/FHAI_3/Conditional_MNIST/logs/'}  --host localhost # REPLACE THE STRING IN BRACKETS WITH PATH TO STORE LOGS.
 
 # Change to the project directory
 cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST

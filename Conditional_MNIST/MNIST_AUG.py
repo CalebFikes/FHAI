@@ -629,9 +629,9 @@ for trial in range(1):
     bal_dta.data = train.data[0:n_samples]
     bal_dta.targets = train.targets[0:n_samples]
 
-    aug_data = Aug(train, .1, configs_DDPM) #treatment2
+    aug_data = Aug(dta, .1, configs_DDPM) #treatment2
 
-    SMOTE_data = Aug_SMOTE(train)
+    SMOTE_data = Aug_SMOTE(dta)
 
     train_classifier(imb_data,test,configs)
     train_classifier(bal_data,test,configs)
