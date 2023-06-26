@@ -26,8 +26,8 @@ from tqdm import tqdm
 from tqdm.notebook import tqdm
 from imblearn.over_sampling import SMOTE
 
-import torch.utils.tensorboard
-from torch.utils.tensorboard import SummaryWriter
+#import torch.utils.tensorboard
+#from torch.utils.tensorboard import SummaryWriter
 
 import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
@@ -81,7 +81,7 @@ test=torchvision.datasets.MNIST('data/', train=False, download=True,
 #%rm -rf ./logs/ # clear tensorboard logs --  COMMENT THIS OUT IN THE FUTURE
 
 # create instance of writer for tensorboard
-writer = SummaryWriter('logs/MNIST_imbalanced') # path to directory containing run data
+#writer = SummaryWriter('logs/MNIST_imbalanced') # path to directory containing run data
 
 
 class PrepareData:
