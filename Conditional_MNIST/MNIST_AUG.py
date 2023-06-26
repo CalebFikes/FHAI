@@ -93,7 +93,7 @@ class PrepareData:
         Subsets data to select only desired classes, then imbalances training set, then refactors labels.
         Returns 4 float tensors
         """
-        self.train_data, self.train_targets = self.prepare_imbalanced_dataset(train_set, prop_keep)
+        self.train_data, self.train_targets = self.prepare_imbalanced_dataset(train_set, prop_keep, class0,class1)
         self.test_data, self.test_targets = self.prepare_test_dataset(test_set)
         self.class0 = class0
         self.class1 = class1
@@ -104,15 +104,15 @@ class PrepareData:
         targets = self.refactor_labels(targets)
         return data.float(), targets.float()
 
-    def prepare_imbalanced_dataset(self, dataset, prop_keep):
+    def prepare_imbalanced_dataset(self, dataset, prop_keep,class0,class1):
         data, targets = dataset.data, dataset.targets
-        data, targets = self.subset_data(data, targets)
+        data, targets = self.subset_data(data, targets, class0, class1)
         data, targets = self.imbalance_data(data, targets, prop_keep)
-        targets = self.refactor_labels(targets)
+        targets = self.refactor_labels(targets, class0, class1)
         return data.float(), targets.float()
 
-    def subset_data(self, data, targets):
-        selection = torch.logical_or(targets == self.class0, targets == self.class1)
+    def subset_data(self, data, targets,class0,class1):
+        selection = torch.logical_or(targets == class0, targets == class1)
         data = data[selection]
         targets = targets[selection]
         return data, targets
@@ -124,9 +124,9 @@ class PrepareData:
         targets = targets[idx_to_del].type(torch.float)
         return data, targets
 
-    def refactor_labels(self, targets):
-        targets[targets == float(self.class0)] = 0
-        targets[targets == float(self.class1)] = 1
+    def refactor_labels(self, targets,class0, class1):
+        targets[targets == float(class0)] = 0
+        targets[targets == float(class1)] = 1
         return targets
 
 def imbalance_data(train,test,class0=2,class1=7,prop_keep = 1):
