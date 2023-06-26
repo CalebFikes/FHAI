@@ -85,7 +85,7 @@ test=torchvision.datasets.MNIST('data/', train=False, download=True,
 
 
 class PrepareData:
-    def __init__(self, train_set, test_set, prop_keep = 1):
+    def __init__(self, train_set, test_set, class0, class1, prop_keep = 1):
         """
         Arguments:
             train_set (torch dataset object)
@@ -95,8 +95,8 @@ class PrepareData:
         """
         self.train_data, self.train_targets = self.prepare_imbalanced_dataset(train_set, prop_keep)
         self.test_data, self.test_targets = self.prepare_test_dataset(test_set)
-        class0 = 2
-        class1 = 5 #testing
+        self.class0 = class0
+        self.class1 = class1
 
     def prepare_test_dataset(self, dataset):
         data, targets = dataset.data, dataset.targets
@@ -112,21 +112,21 @@ class PrepareData:
         return data.float(), targets.float()
 
     def subset_data(self, data, targets):
-        selection = torch.logical_or(targets == class0, targets == class1)
+        selection = torch.logical_or(targets == self.class0, targets == self.class1)
         data = data[selection]
         targets = targets[selection]
         return data, targets
 
     def imbalance_data(self, data, targets, prop_keep):
-        sample_probs = {str(class0): (1 - prop_keep), str(class1): 0}
+        sample_probs = {str(self.class0): (1 - prop_keep), str(self.class1): 0}
         idx_to_del = [i for i, label in enumerate(targets) if random.random() > sample_probs[str(label.item())]]
         data = data[idx_to_del]
         targets = targets[idx_to_del].type(torch.float)
         return data, targets
 
     def refactor_labels(self, targets):
-        targets[targets == float(class0)] = 0
-        targets[targets == float(class1)] = 1
+        targets[targets == float(self.class0)] = 0
+        targets[targets == float(self.class1)] = 1
         return targets
 
 def imbalance_data(train,test,prop_keep = 1):
