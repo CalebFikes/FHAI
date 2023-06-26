@@ -681,7 +681,8 @@ def Aug_SMOTE(train):
     return dta
 
 train, test = imbalance_data(train,test,2,7,1)
-train_classifier(train,test,configs)
+aug_data = Aug(dta, .1, configs_DDPM) #treatment2
+train_classifier(aug_data,test,configs)
 
 
 """
