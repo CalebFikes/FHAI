@@ -4,6 +4,7 @@ start_time = time.time()
 import copy
 import logging
 import random
+import math
 from typing import Dict, Tuple
 
 import matplotlib.pyplot as plt
@@ -23,6 +24,7 @@ from torchvision.datasets import MNIST
 from torchvision.utils import save_image, make_grid
 from tqdm import tqdm
 from tqdm.notebook import tqdm
+from imblearn.over_sampling import SMOTE
 
 import torch.utils.tensorboard
 from torch.utils.tensorboard import SummaryWriter
@@ -31,6 +33,7 @@ import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_LAUNCH_BLOCKING"]="1"
 torch.manual_seed(8675309)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
@@ -38,7 +41,7 @@ configs = {
 'batch_size_train' : 512, 
 'batch_size_test' : 500, 
 'learning_rate' : 0.0075, 
-'momentum' : 0.5, 
+'momentum' : 0.2, 
 'log_interval' : 10,
 'class_labels' : np.array([2,7])
 }
@@ -49,7 +52,7 @@ configs_DDPM = {
     'n_T' : 200, 
     'device' : "cuda:0",
     'n_classes' : 2, 
-    'n_feat' : 128, 
+    'n_feat' : 256, 
     'lrate' : 1e-4,
     '1' : .1
 }
@@ -460,7 +463,6 @@ class DDPM(nn.Module):
     
 def train_classifier(train, test, configs):
     torch.backends.cudnn.enabled = False
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Define train loader and test loader
     train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True)
@@ -611,6 +613,10 @@ def Aug_SMOTE(train):
 
     return X_tensor, y_tensor
 
+train_classifier(train,test,configs)
+
+
+"""
 for trial in range(1):
     imb_data = imbalance_data(train,test, .1) #treatment1
 
@@ -627,7 +633,7 @@ for trial in range(1):
     train_classifier(bal_data,test,configs)
     train_classifier(aug_data,test,configs)
     train_classifier(SMOTE_data,test,configs)
-
+"""
 
 
 
