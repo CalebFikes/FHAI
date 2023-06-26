@@ -132,7 +132,7 @@ class Net(nn.Module):
 # configs
 configs = {
 'n_epochs' : 50, 
-'batch_size_train' : 128, 
+'batch_size_train' : 256, 
 'batch_size_test' : 500, 
 'learning_rate' : 0.01, 
 'momentum' : 0.5, 
