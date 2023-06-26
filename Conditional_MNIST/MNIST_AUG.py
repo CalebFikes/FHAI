@@ -140,7 +140,7 @@ configs = {
 'class_labels' : np.array([2,7])
 }
 torch.backends.cudnn.enabled = False
-device = 'cuda'
+device = 'cuda:1'
 
 
 # Define train loader and test loader
@@ -203,7 +203,7 @@ for epoch in range(1, configs['n_epochs']):
     logging.info(f"Starting epoch {epoch}:")
     pbar = tqdm(train_loader, position=0, leave=True)
     for batch_idx, (data, target) in enumerate(pbar):
-        data, target = data, target # since I'm using CPU, I do not push these tensors to device 
+        data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
         optimizer.zero_grad()
         output = model(data)
         loss = loss_fn(output, target)
@@ -256,4 +256,4 @@ table = '\n'.join(l.strip() for l in table.splitlines())
 writer.add_text("table", table, 0)
 writer.flush()
 writer.close()
-os.system(tensorboard --logdir=runs)
+#os.system(tensorboard --logdir==runs)
