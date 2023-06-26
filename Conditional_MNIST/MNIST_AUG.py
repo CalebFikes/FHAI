@@ -681,7 +681,12 @@ def Aug_SMOTE(train):
     return dta
 
 train, test = imbalance_data(train,test,2,7,1)
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
 aug_data = Aug(train, .1, configs_DDPM) #treatment2
+
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
 train_classifier(aug_data,test,configs)
 
 
