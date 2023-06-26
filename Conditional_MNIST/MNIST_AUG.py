@@ -469,7 +469,7 @@ def train_classifier(train, test, configs):
     test_loader = torch.utils.data.DataLoader(test, batch_size=configs['batch_size_test'], shuffle=True)
 
     # Define loss function
-    loss_fn = nn.CrossEntropyLoss()
+    loss_fn = nn.CrossEntropyLoss().to(device)
     model = Net().to(device) # creating an instance of Net() and pushing it to GPU
     optimizer = torch.optim.SGD(model.parameters(), configs['learning_rate'], configs['momentum']) # (optimizer args specified in configs)
     
@@ -589,7 +589,6 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
   #ddpm = ddpm.to("cpu") #remove for zuber
   ddpm.eval()
   with torch.no_grad():
-      n_sample = 2
       x_gen, x_gen_store = ddpm.sample(n_gen, (1, 28, 28), "cuda:0", label=[0],guide_w=0.5) #set to "cuda:0" for zuber
   plt.imshow(x_gen[0].reshape(28,28).cpu(), cmap="gray")
   plt.show()
