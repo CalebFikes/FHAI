@@ -469,7 +469,7 @@ def train_classifier(train, test, configs):
     test_loader = torch.utils.data.DataLoader(test, batch_size=configs['batch_size_test'], shuffle=True)
 
     # Define loss function
-    loss_fn = nn.CrossEntropyLoss()
+    loss_fn = nn.CrossEntropyLoss().to(device)
     model = Net().to(device) # creating an instance of Net() and pushing it to GPU
     optimizer = torch.optim.SGD(model.parameters(), configs['learning_rate'], configs['momentum']) # (optimizer args specified in configs)
     
