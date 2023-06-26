@@ -599,7 +599,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         end_idx = (i + 1) * batch_size
 
         # Generate images
-        x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)\
+        x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen = x_gen.to(device)
 
         # Concatenate generated images with existing data
