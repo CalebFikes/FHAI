@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=FHAI
 #SBATCH --output=out
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 
 # Create and activate the virtual environment
 virtualenv -p python3 venv
