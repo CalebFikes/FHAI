@@ -124,7 +124,7 @@ class PrepareData:
 
     def refactor_labels(self, targets):
         targets[targets == 2.] = 0
-        targets[targets == 7.] = 1
+        targets[targets == 5.] = 1 #TESTING
         return targets
 
 def imbalance_data(train,test,prop_keep = 1):
@@ -598,6 +598,69 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
   return train_data
 
+def Full_Synth(train_data, length, configs, save_model = False, save_dir = './data/diffusion_outputs10/'):
+  n_epoch = configs['n_epoch']
+  batch_size = configs['batch_size']
+  n_T = configs['n_T']
+  n_classes = configs['n_classes']
+  n_feat = configs['n_feat']
+  lrate = configs['lrate']
+  w = configs['w']
+
+  length = length // 2
+
+  n= train_data.data.shape[0]
+  n_gen = math.ceil((1 - prop_keep) * n)
+  print(n, n_gen)
+
+  print("training generator")
+  ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
+  ddpm.to(device)
+
+  dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+
+  optim = torch.optim.Adam(ddpm.parameters(), lr=lrate)
+
+  for ep in range(n_epoch):
+      print(f'epoch {ep}')
+      ddpm.train()
+
+      # linear lrate decay
+      optim.param_groups[0]['lr'] = lrate*(1-ep/n_epoch)
+
+      pbar = tqdm(dataloader)
+      loss_ema = None
+      for x, c in pbar:
+          optim.zero_grad()
+          x = x.to(device)
+          c = c.to(device)
+          loss = ddpm(x, c)
+          loss.backward()
+          if loss_ema is None:
+              loss_ema = loss.item()
+          else:
+              loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
+          pbar.set_description(f"loss: {loss_ema:.4f}")
+          optim.step()
+
+  torch.save(ddpm.state_dict(), f"model_{ep}.pth")
+  torch.cuda.empty_cache()
+
+
+  print("augmentation")
+  #ddpm = ddpm.to("cpu") #remove for zuber
+  ddpm.eval()
+  with torch.no_grad():
+      x_gen0, x_gen_store0 = ddpm.sample(length, (1, 28, 28), "cuda:0", label=[0],guide_w=0.5) #set to "cuda:0" for zuber
+      x_gen1, x_gen_store1 = ddpm.sample(length, (1, 28, 28), "cuda:0", label=[1],guide_w=0.5)
+  plt.imshow(x_gen[0].reshape(28,28).cpu(), cmap="gray")
+  plt.show()
+
+  train_data.data = torch.cat([x_gen0, x_gen1], 0)
+  train_data.targets = torch.cat([torch.ones(length),torch.zero(length)], 0)
+
+  return train_data
+
 def Aug_SMOTE(train):
     """
     require torch.dataset object
@@ -623,7 +686,7 @@ train_classifier(train,test,configs)
 dta = torchvision.datasets.MNIST(download = FALSE)
 bal_dta = torchvision.datasets.MNIST(download = FALSE) #make bal_data a torch dataset
 for trial in range(1):
-    dta.data, dta.targets = imbalance_data(train,test, .1) #treatment1
+    dta.data, dta.targets = imbalance_data(train, test, .1) #treatment1
 
     n_samples = len(imb_data) #treatment0
     bal_dta.data = train.data[0:n_samples]
@@ -631,7 +694,7 @@ for trial in range(1):
 
     aug_data = Aug(dta, .1, configs_DDPM) #treatment2
 
-    SMOTE_data = Aug_SMOTE(dta)
+    SMOTE_data = Aug_SMOTE(dta) #treatment3
 
     train_classifier(imb_data,test,configs)
     train_classifier(bal_data,test,configs)
