@@ -43,7 +43,8 @@ configs = {
 'learning_rate' : 0.01, 
 'momentum' : 0.2, 
 'log_interval' : 10,
-'class_labels' : np.array([2,7])
+'class_labels' : np.array([2,7]),
+'w' : .1
 }
 
 configs_DDPM = {
@@ -414,7 +415,7 @@ class DDPM(nn.Module):
         # return MSE between added noise, and our predicted noise
         return self.loss_mse(noise, self.nn_model(x_t, c, _ts / self.n_T, context_mask))
 
-    def sample(self, n_sample, size, device, label= 2, guide_w = 0.0):
+    def sample(self, n_sample, size, device, label= 2, guide_w = 0.01):
         # we follow the guidance sampling scheme described in 'Classifier-Free Diffusion Guidance'
         # to make the fwd passes efficient, we concat two versions of the dataset,
         # one with context_mask=0 and the other context_mask=1
