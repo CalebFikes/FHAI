@@ -117,8 +117,8 @@ class PrepareData:
         targets = targets[selection]
         return data, targets
 
-    def imbalance_data(self, data, targets, prop_keep):
-        sample_probs = {str(self.class0): (1 - prop_keep), str(self.class1): 0}
+    def imbalance_data(self, data, targets, prop_keep, class0, class1):
+        sample_probs = {str(class0): (1 - prop_keep), str(class1): 0}
         idx_to_del = [i for i, label in enumerate(targets) if random.random() > sample_probs[str(label.item())]]
         data = data[idx_to_del]
         targets = targets[idx_to_del].type(torch.float)
