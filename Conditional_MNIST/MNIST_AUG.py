@@ -61,7 +61,7 @@ writer = SummaryWriter('logs/MNIST_imbalanced') # path to directory containing r
 
 
 class PrepareData:
-    def __init__(self, train_set, test_set, prop_keep):
+    def __init__(self, train_set, test_set, prop_keep = 1):
         """
         Arguments:
             train_set (torch dataset object)
