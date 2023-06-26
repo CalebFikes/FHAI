@@ -485,7 +485,7 @@ def train_classifier(train, test, configs):
         for batch_idx, (data, target) in enumerate(pbar):
             data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
             optimizer.zero_grad()
-            output = model(data)
+            output = model(data).to(device)
             loss = loss_fn(output, target)
             loss.backward()
             optimizer.step()
