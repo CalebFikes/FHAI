@@ -1,3 +1,6 @@
+import time
+start_time = time.time()
+
 import copy
 import logging
 import random
@@ -256,4 +259,8 @@ table = '\n'.join(l.strip() for l in table.splitlines())
 writer.add_text("table", table, 0)
 writer.flush()
 writer.close()
+end_time = time.time()
 #os.system(tensorboard --logdir==runs)
+
+
+print("Time Elapsed: ", start_time - end_time)
