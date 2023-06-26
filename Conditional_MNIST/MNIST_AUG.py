@@ -599,7 +599,8 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         end_idx = (i + 1) * batch_size
 
         # Generate images
-        x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5).to(device)
+        x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)\
+        x_gen = x_gen.to(device)
 
         # Concatenate generated images with existing data
         train_data.data = torch.cat([x_gen, train_data.data], 0)
@@ -617,6 +618,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
         # Generate remaining images
         x_gen, x_gen_store = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
+        x_gen = x_gen.to(device)
 
         # Concatenate remaining generated images with existing data
         train_data.data = torch.cat([x_gen, train_data.data], 0)
@@ -693,6 +695,8 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         # Generate images
         x_gen0, x_gen_store0 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen1, x_gen_store1 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
+        
+        x_gen0,x_gen1 = x_gen0.to(device), x_gen1.to(device)
 
         # Concatenate generated images
         batch_data = torch.cat([x_gen0, x_gen1], 0)
@@ -715,6 +719,8 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         # Generate images
         x_gen0, x_gen_store0 = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen1, x_gen_store1 = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
+
+        x_gen0,x_gen1 = x_gen0.to(device), x_gen1.to(device)
 
         # Concatenate generated images
         batch_data = torch.cat([x_gen0, x_gen1], 0)
