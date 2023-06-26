@@ -190,7 +190,7 @@ def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):
     return fig
 
 
-model = Net() #.to(device) # creating an instance of Net() and pushing it to GPU
+model = Net().to(device) # creating an instance of Net() and pushing it to GPU
 optimizer = torch.optim.SGD(model.parameters(), configs['learning_rate'], configs['momentum']) # (optimizer args specified in configs)
  
 train_loss = []
