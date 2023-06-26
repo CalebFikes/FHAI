@@ -7,6 +7,10 @@
 virtualenv -p python3 venv
 source venv/bin/activate
 
+#setup pip
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python3.8 get-pip.py
+
 # Install required packages
 pip install copy logging typing random math matplotlib matplotlib.pyplot numplotnumpy==1.19.5 pandas==1.3.0 
 pip install  torch scikit-learn==0.24.2 torchvision==0.9.1 tqdm==4.61.1 torch-utils-data==0.2.0 
