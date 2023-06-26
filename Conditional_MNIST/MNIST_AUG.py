@@ -105,7 +105,7 @@ class PrepareData:
 
 
 # Modify the data
-data_preparer = PrepareData(train, test, 0.1)
+data_preparer = PrepareData(train, test) #, 0.1)
 train.data = data_preparer.train_data
 train.targets = data_preparer.train_targets
 test.data = data_preparer.test_data
