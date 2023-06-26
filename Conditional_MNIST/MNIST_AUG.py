@@ -593,7 +593,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
   with torch.no_grad():
     batch_size = 512
     num_batches = n_gen // batch_size
-
+    train_data.data.to(device) #send data to device for concatenation
     for i in range(num_batches):
         start_idx = i * batch_size
         end_idx = (i + 1) * batch_size
@@ -685,7 +685,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
   with torch.no_grad():
     batch_size = 512
     num_batches = length // batch_size
-
+    train_data.data.to(device)
     for i in range(num_batches):
         start_idx = i * batch_size
         end_idx = (i + 1) * batch_size
