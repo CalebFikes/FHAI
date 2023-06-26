@@ -225,8 +225,8 @@ for epoch in range(1, configs['n_epochs']):
             _, pred = torch.max(output,dim=1)
             correct += pred.eq(target.view_as(pred)).sum().item()
 
-            targets += list(target.numpy())
-            preds += list(pred.numpy())
+            targets += list(target.to("cpu").numpy())
+            preds += list(pred.to("cpu").numpy())
 
     test_acc = 100. * correct / len(test_loader.dataset)
     writer.add_scalar('Test Accuracy', test_acc, epoch)
