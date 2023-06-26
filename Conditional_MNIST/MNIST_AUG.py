@@ -85,7 +85,7 @@ test=torchvision.datasets.MNIST('data/', train=False, download=True,
 
 
 class PrepareData:
-    def __init__(self, train_set, test_set, class0, class1, prop_keep = 1):
+    def __init__(self, train_set, test_set, class0=2, class1=7, prop_keep = 1):
         """
         Arguments:
             train_set (torch dataset object)
@@ -131,7 +131,7 @@ class PrepareData:
 
 def imbalance_data(train,test,class0,class1,prop_keep = 1):
     # Modify the data
-    data_preparer = PrepareData(train, test,2,5) #, 0.1)
+    data_preparer = PrepareData(train, test,class0,class1) #, 0.1)
     train.data = data_preparer.train_data
     train.targets = data_preparer.train_targets
     test.data = data_preparer.test_data
@@ -680,7 +680,7 @@ def Aug_SMOTE(train):
 
     return dta
 
-train, test = imbalance_data(train,test,1)
+train, test = imbalance_data(train,test,2,5,1)
 train_classifier(train,test,configs)
 
 
