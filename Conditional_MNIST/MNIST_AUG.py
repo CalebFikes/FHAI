@@ -37,7 +37,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 10, 
+'n_epochs' : 1, 
 'batch_size_train' : 64, 
 'batch_size_test' : 500, 
 'learning_rate' : 0.01, 
@@ -602,6 +602,7 @@ def Aug_SMOTE(train):
     """
     require torch.dataset object
     """
+    dta = torchvision.datasets.MNIST(download = FALSE)
     smote = SMOTE()
     X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets) # smote the dataset (must flatten to 2d first)
 
@@ -609,21 +610,24 @@ def Aug_SMOTE(train):
 
     X_tensor = torch.from_numpy(X).view(len(X), 28, 28).float().requires_grad_(True) #.to(device) # push X to GPU and reshape
     y_tensor = torch.from_numpy(y).type(torch.LongTensor) #.to(device)
+    dta.data = X_tensor
+    dta.targets = y_tensor
 
-    return X_tensor, y_tensor
+    return dta
 
 train, test = imbalance_data(train,test,1)
 train_classifier(train,test,configs)
 
 
 """
+dta = torchvision.datasets.MNIST(download = FALSE)
+bal_dta = torchvision.datasets.MNIST(download = FALSE) #make bal_data a torch dataset
 for trial in range(1):
-    imb_data = imbalance_data(train,test, .1) #treatment1
+    dta.data, dta.targets = imbalance_data(train,test, .1) #treatment1
 
-    n_samples = len(imb_data)
-    bal_data = torchvision.datasets.MNIST(download = FALSE) #make bal_data a torch dataset
-    bal_data.data = train.data[0:n_samples]
-    bal_data.targets = train.targets[0:n_samples] #treatment0
+    n_samples = len(imb_data) #treatment0
+    bal_dta.data = train.data[0:n_samples]
+    bal_dta.targets = train.targets[0:n_samples]
 
     aug_data = Aug(train, .1, configs_DDPM) #treatment2
 
