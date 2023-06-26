@@ -16,10 +16,10 @@ pip install "git+https://github.com/tqdm/tqdm.git@devel#egg=tqdm"
 pip install --upgrade jupyter
 pip install --upgrade ipywidgets
 pip install tensorboard
-tensorboard --logdir {'/local/scratch/cfikes/FHAI_3/Conditional_ORI/logs/'}  --host localhost # REPLACE THE STRING IN BRACKETS WITH PATH TO STORE LOGS.
+tensorboard --logdir {'/local/scratch/cfikes/FHAI_3/Conditional_MNIST/logs/'}  --host localhost # REPLACE THE STRING IN BRACKETS WITH PATH TO STORE LOGS.
 
 # Change to the project directory
-cd /local/scratch/cfikes/FHAI_3/Conditional_ORI
+cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST
 
 # Run the Python script
-python3.8 treatment_ddpm.py
+python3.8 MNIST_AUG.py

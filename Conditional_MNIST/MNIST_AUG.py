@@ -48,13 +48,13 @@ test=torchvision.datasets.MNIST('data/', train=False, download=True,
 
 # Set up tensorboard
 #%pip install tensorboard
-%reload_ext tensorboard
+#%reload_ext tensorboard
 #%reload_ext tensorboard
 
-%rm -rf ./logs/ # clear tensorboard logs --  COMMENT THIS OUT IN THE FUTURE
+#%rm -rf ./logs/ # clear tensorboard logs --  COMMENT THIS OUT IN THE FUTURE
 
 # create instance of writer for tensorboard
-writer = SummaryWriter('runs/MNIST_imbalanced') # path to directory containing run data
+writer = SummaryWriter('logs/MNIST_imbalanced') # path to directory containing run data
 
 
 class PrepareData:
