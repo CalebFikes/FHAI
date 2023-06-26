@@ -483,9 +483,9 @@ def train_classifier(train, test, configs):
         logging.info(f"Starting epoch {epoch}:")
         pbar = tqdm(train_loader, position=0, leave=True)
         for batch_idx, (data, target) in enumerate(pbar):
-            data, target = data.to(device), target # since I'm using CPU, I do not push these tensors to device 
+            data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
             optimizer.zero_grad()
-            output = model(data)
+            output = model(data).to(device)
             loss = loss_fn(output, target)
             loss.backward()
             optimizer.step()
@@ -494,9 +494,9 @@ def train_classifier(train, test, configs):
         model.eval()
         correct = 0 # count correct predictions
         train_loss.append(loss.item())
-        writer.add_scalar('Training loss',
-                                loss.item(),
-                                epoch)
+        #writer.add_scalar('Training loss',
+        #                       loss.item(),
+        #                        epoch)
         targets, preds = [], []
         with torch.no_grad():
             for data, target in test_loader:
@@ -509,7 +509,7 @@ def train_classifier(train, test, configs):
                 preds += list(pred.to("cpu").numpy())
 
         test_acc = 100. * correct / len(test_loader.dataset)
-        writer.add_scalar('Test Accuracy', test_acc, epoch)
+        #writer.add_scalar('Test Accuracy', test_acc, epoch)
         confusion_mtx = sm.confusion_matrix(targets, preds)
         confusion_mtxes.append(confusion_mtx)
         test_accs.append(test_acc)
@@ -524,18 +524,18 @@ def train_classifier(train, test, configs):
 
     print(f'f1 score: {f1} \n recall: {recall} \n precision: {precision} \n Area under receiving operating characteristic: {auroc}')
 
-    writer.add_figure('matplotlib', vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], figsize=(15, 5)))
+    #writer.add_figure('matplotlib', vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], figsize=(15, 5)))
 
 
-    table = f"""
-        | Metric   |    f1     | Precision | Recall    |   AUROC   |
-        |----------|-----------|-----------|-----------|-----------|
-        |          |   {f1}    |{precision}| {recall}  |   {auroc} |
-    """
-    table = '\n'.join(l.strip() for l in table.splitlines())
-    writer.add_text("table", table, 0)
-    writer.flush()
-    writer.close()
+    # table = f"""
+    #     | Metric   |    f1     | Precision | Recall    |   AUROC   |
+    #     |----------|-----------|-----------|-----------|-----------|
+    #     |          |   {f1}    |{precision}| {recall}  |   {auroc} |
+    # """
+    # table = '\n'.join(l.strip() for l in table.splitlines())
+    # writer.add_text("table", table, 0)
+    # writer.flush()
+    # writer.close()
     return f1, recall, precision, auroc
 
 def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/diffusion_outputs10/'):
