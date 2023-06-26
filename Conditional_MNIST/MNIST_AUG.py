@@ -101,7 +101,7 @@ class PrepareData:
     def prepare_test_dataset(self, dataset,class0,class1):
         data, targets = dataset.data, dataset.targets
         data, targets = self.subset_data(data, targets,class0,class1)
-        targets = self.refactor_labels(targets)
+        targets = self.refactor_labels(targets, class0, class1)
         return data.float(), targets.float()
 
     def prepare_imbalanced_dataset(self, dataset, prop_keep,class0,class1):
