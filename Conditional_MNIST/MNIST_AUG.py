@@ -37,7 +37,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 10, 
+'n_epochs' : 30, 
 'batch_size_train' : 128, 
 'batch_size_test' : 500, 
 'learning_rate' : 0.01, 
@@ -645,4 +645,4 @@ for trial in range(1):
 
 #os.system(tensorboard --logdir==runs)
 end_time = time.time()
-print("Time Elapsed: ", start_time - end_time)
+print("Time Elapsed: ", end_time - start_time)
