@@ -129,9 +129,9 @@ class PrepareData:
         targets[targets == float(self.class1)] = 1
         return targets
 
-def imbalance_data(train,test,class0,class1,prop_keep = 1):
+def imbalance_data(train,test,class0=2,class1=7,prop_keep = 1):
     # Modify the data
-    data_preparer = PrepareData(train, test,class0,class1) #, 0.1)
+    data_preparer = PrepareData(train, test,class0,class1, prop_keep) #, 0.1)
     train.data = data_preparer.train_data
     train.targets = data_preparer.train_targets
     test.data = data_preparer.test_data
