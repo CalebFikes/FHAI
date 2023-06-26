@@ -47,8 +47,8 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 30,
-    "batch_size" : 256, 
+    'n_epoch' : 100,
+    "batch_size" : 1024, 
     'n_T' : 200, 
     'device' : "cuda:0",
     'n_classes' : 2, 
@@ -687,21 +687,28 @@ train_classifier(train,test,configs)
 """
 dta = torchvision.datasets.MNIST(download = FALSE)
 bal_dta = torchvision.datasets.MNIST(download = FALSE) #make bal_data a torch dataset
+#df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5', 
+                            'recall_1', 'recall_2', 'recall_3', 'recall_4', 'recall_5', 
+                            'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
+                            'auroc_1','auroc_2','auroc_3','auroc_4','auroc_5'])
 for trial in range(1):
     dta.data, dta.targets = imbalance_data(train, test, .1) #treatment1
 
-    n_samples = len(imb_data) #treatment0
-    bal_dta.data = train.data[0:n_samples]
-    bal_dta.targets = train.targets[0:n_samples]
+    n_samples = len(dta.targets) 
+    bal_dta.data = train.data[0:n_samples] #treatment5
+    bal_dta.targets = train.targets[0:n_samples] 
 
     aug_data = Aug(dta, .1, configs_DDPM) #treatment2
 
     SMOTE_data = Aug_SMOTE(dta) #treatment3
 
-    train_classifier(imb_data,test,configs)
-    train_classifier(bal_data,test,configs)
-    train_classifier(aug_data,test,configs)
-    train_classifier(SMOTE_data,test,configs)
+    Synth_data = Full_Synth(dta,n_samples,configs_DDPM) #treatment4
+
+    treat1 = train_classifier(imb_data,test,configs)
+    treat2 = train_classifier(aug_data,test,configs)
+    treat3 = train_classifier(SMOTE_data,test,configs)
+    treat4 = train_classifier(Synth_data,test,configs)
+    treat5 = train_classifier(bal_data,test,configs)
 """
 
 
