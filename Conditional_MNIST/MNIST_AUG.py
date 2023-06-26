@@ -93,21 +93,21 @@ class PrepareData:
         Subsets data to select only desired classes, then imbalances training set, then refactors labels.
         Returns 4 float tensors
         """
-        self.train_data, self.train_targets = self.prepare_imbalanced_dataset(train_set, prop_keep, class0,class1)
-        self.test_data, self.test_targets = self.prepare_test_dataset(test_set)
+        self.train_data, self.train_targets = self.prepare_imbalanced_dataset(train_set, class0, class1, prop_keep)
+        self.test_data, self.test_targets = self.prepare_test_dataset(test_set,class0,class1)
         self.class0 = class0
         self.class1 = class1
 
-    def prepare_test_dataset(self, dataset):
+    def prepare_test_dataset(self, dataset,class0,class1):
         data, targets = dataset.data, dataset.targets
-        data, targets = self.subset_data(data, targets)
+        data, targets = self.subset_data(data, targets,class0,class1)
         targets = self.refactor_labels(targets)
         return data.float(), targets.float()
 
     def prepare_imbalanced_dataset(self, dataset, prop_keep,class0,class1):
         data, targets = dataset.data, dataset.targets
         data, targets = self.subset_data(data, targets, class0, class1)
-        data, targets = self.imbalance_data(data, targets, prop_keep, class0, class1)
+        data, targets = self.imbalance_data(data, targets, class0, class1, prop_keep)
         targets = self.refactor_labels(targets, class0, class1)
         return data.float(), targets.float()
 
@@ -117,7 +117,7 @@ class PrepareData:
         targets = targets[selection]
         return data, targets
 
-    def imbalance_data(self, data, targets, prop_keep, class0, class1):
+    def imbalance_data(self, data, targets, class0, class1, prop_keep):
         sample_probs = {str(class0): (1 - prop_keep), str(class1): 0}
         idx_to_del = [i for i, label in enumerate(targets) if random.random() > sample_probs[str(label.item())]]
         data = data[idx_to_del]
