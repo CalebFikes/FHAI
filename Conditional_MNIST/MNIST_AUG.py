@@ -55,7 +55,7 @@ configs_DDPM = {
     'n_classes' : 2, 
     'n_feat' : 256, 
     'lrate' : 1e-4,
-    '1' : .1
+    'w' : .1
 }
 
 # Load datasets from torchvision datasets
