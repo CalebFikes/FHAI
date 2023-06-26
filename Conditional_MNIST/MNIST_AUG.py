@@ -220,13 +220,13 @@ for epoch in range(1, configs['n_epochs']):
     targets, preds = [], []
     with torch.no_grad():
         for data, target in test_loader:
-            data, target = data, target # since I'm using CPU, I do not push these tensors to device 
+            data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
             output = model(data)
             _, pred = torch.max(output,dim=1)
             correct += pred.eq(target.view_as(pred)).sum().item()
 
-            targets += list(target.cpu().numpy())
-            preds += list(pred.cpu().numpy())
+            targets += list(target.numpy())
+            preds += list(pred.numpy())
 
     test_acc = 100. * correct / len(test_loader.dataset)
     writer.add_scalar('Test Accuracy', test_acc, epoch)
