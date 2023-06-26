@@ -137,7 +137,7 @@ configs = {
 'n_epochs' : 20, 
 'batch_size_train' : 512, 
 'batch_size_test' : 500, 
-'learning_rate' : 0.01, 
+'learning_rate' : 0.0075, 
 'momentum' : 0.5, 
 'log_interval' : 10,
 'class_labels' : np.array([2,7])
