@@ -469,7 +469,7 @@ def train_classifier(train, test, configs):
     test_loader = torch.utils.data.DataLoader(test, batch_size=configs['batch_size_test'], shuffle=True)
 
     # Define loss function
-    loss_fn = nn.CrossEntropyLoss().to(device)
+    loss_fn = nn.CrossEntropyLoss()
     model = Net().to(device) # creating an instance of Net() and pushing it to GPU
     optimizer = torch.optim.SGD(model.parameters(), configs['learning_rate'], configs['momentum']) # (optimizer args specified in configs)
     
@@ -483,9 +483,9 @@ def train_classifier(train, test, configs):
         logging.info(f"Starting epoch {epoch}:")
         pbar = tqdm(train_loader, position=0, leave=True)
         for batch_idx, (data, target) in enumerate(pbar):
-            data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
+            data, target = data.to(device), target # since I'm using CPU, I do not push these tensors to device 
             optimizer.zero_grad()
-            output = model(data).to(device)
+            output = model(data)
             loss = loss_fn(output, target)
             loss.backward()
             optimizer.step()
@@ -612,6 +612,7 @@ def Aug_SMOTE(train):
 
     return X_tensor, y_tensor
 
+train, test = imbalance_data(train,test,1)
 train_classifier(train,test,configs)
 
 

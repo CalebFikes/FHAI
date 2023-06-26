@@ -479,7 +479,7 @@ def Aug(train_data, prop_keep, n_epoch = 30, batch_size = 256,  n_T = 200,  devi
   train_data.data = torch.cat([x_gen, train_data.data], 0)
   train_data.targets = torch.cat([torch.ones(n_gen),train_data.targets], 0)
 
-  return x_gen
+  return train_data
 
 def Aug_SMOTE(train):
     """
