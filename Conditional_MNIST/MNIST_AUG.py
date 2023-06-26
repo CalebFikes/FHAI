@@ -37,8 +37,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 30, 
-'batch_size_train' : 128, 
+'n_epochs' : 100, 
+'batch_size_train' : 1024, 
 'batch_size_test' : 500, 
 'learning_rate' : 0.01, 
 'momentum' : 0.2, 
@@ -47,7 +47,7 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 100,
+    'n_epoch' : 5,
     "batch_size" : 1024, 
     'n_T' : 200, 
     'device' : "cuda:0",
@@ -681,7 +681,7 @@ def Aug_SMOTE(train):
     return dta
 
 train, test = imbalance_data(train,test,2,7,1)
-aug_data = Aug(dta, .1, configs_DDPM) #treatment2
+aug_data = Aug(train, .1, configs_DDPM) #treatment2
 train_classifier(aug_data,test,configs)
 
 
