@@ -659,7 +659,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
   plt.show()
 
   train_data.data = torch.cat([x_gen0, x_gen1], 0)
-  train_data.targets = torch.cat([torch.ones(length),torch.zero(length)], 0)
+  train_data.targets = torch.cat([torch.zeros(length),torch.ones(length)], 0)
 
   return train_data
 
@@ -680,7 +680,7 @@ def Aug_SMOTE(train):
 
     return dta
 
-train, test = imbalance_data(train,test,2,5,1)
+train, test = imbalance_data(train,test,2,3,1)
 train_classifier(train,test,configs)
 
 
