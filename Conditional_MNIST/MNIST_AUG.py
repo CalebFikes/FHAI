@@ -589,15 +589,45 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
 
   print("augmentation")
-  #ddpm = ddpm.to("cpu") #remove for zuber
   ddpm.eval()
   with torch.no_grad():
-      x_gen, x_gen_store = ddpm.sample(n_gen, (1, 28, 28), "cuda:0", label=[0],guide_w=0.5) #set to "cuda:0" for zuber
-  plt.imshow(x_gen[0].reshape(28,28).cpu(), cmap="gray")
-  plt.show()
+    batch_size = 512
+    num_batches = n_gen // batch_size
 
-  train_data.data = torch.cat([x_gen, train_data.data], 0)
-  train_data.targets = torch.cat([torch.ones(n_gen),train_data.targets], 0)
+    for i in range(num_batches):
+        start_idx = i * batch_size
+        end_idx = (i + 1) * batch_size
+
+        # Generate images
+        x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
+
+        # Concatenate generated images with existing data
+        train_data.data = torch.cat([x_gen, train_data.data], 0)
+        train_data.targets = torch.cat([torch.ones(batch_size), train_data.targets], 0)
+
+        # Clear memory
+        del x_gen, x_gen_store
+        torch.cuda.empty_cache()
+
+    # If there's any remaining samples
+    remaining_samples = n_gen % batch_size
+    if remaining_samples > 0:
+        start_idx = num_batches * batch_size
+        end_idx = num_batches * batch_size + remaining_samples
+
+        # Generate remaining images
+        x_gen, x_gen_store = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
+
+        # Concatenate remaining generated images with existing data
+        train_data.data = torch.cat([x_gen, train_data.data], 0)
+        train_data.targets = torch.cat([torch.ones(remaining_samples), train_data.targets], 0)
+
+        # Clear memory
+        del x_gen, x_gen_store
+        torch.cuda.empty_cache()
+  #plt.imshow(x_gen[0].reshape(28,28).cpu(), cmap="gray")
+  #plt.show()
+
 
   return train_data
 
@@ -651,16 +681,55 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
 
 
   print("augmentation")
-  #ddpm = ddpm.to("cpu") #remove for zuber
-  torch.cuda.empty_cache() #EXPERIMENTAL
   ddpm.eval()
   with torch.no_grad():
-      x_gen0, x_gen_store0 = ddpm.sample(length, (1, 28, 28), "cuda:0", label=[0],guide_w=0.5) #set to "cuda:0" for zuber
-      x_gen1, x_gen_store1 = ddpm.sample(length, (1, 28, 28), "cuda:0", label=[1],guide_w=0.5)
-  train_data.data = torch.cat([x_gen0, x_gen1], 0)
-  train_data.targets = torch.cat([torch.zeros(length),torch.ones(length)], 0)
-  plt.imshow(x_gen1[0].reshape(28,28).cpu(), cmap="gray")
-  plt.show()
+    batch_size = 512
+    num_batches = length // batch_size
+
+    for i in range(num_batches):
+        start_idx = i * batch_size
+        end_idx = (i + 1) * batch_size
+
+        # Generate images
+        x_gen0, x_gen_store0 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
+        x_gen1, x_gen_store1 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
+
+        # Concatenate generated images
+        batch_data = torch.cat([x_gen0, x_gen1], 0)
+        batch_targets = torch.cat([torch.zeros(batch_size), torch.ones(batch_size)], 0)
+
+        # Update train_data with batch data
+        train_data.data[start_idx:end_idx] = batch_data
+        train_data.targets[start_idx:end_idx] = batch_targets
+
+        # Clear memory
+        del x_gen0, x_gen1, x_gen_store0, x_gen_store1
+        torch.cuda.empty_cache()
+
+    # If there's any remaining samples
+    remaining_samples = length % batch_size
+    if remaining_samples > 0:
+        start_idx = num_batches * batch_size
+        end_idx = num_batches * batch_size + remaining_samples
+
+        # Generate images
+        x_gen0, x_gen_store0 = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
+        x_gen1, x_gen_store1 = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
+
+        # Concatenate generated images
+        batch_data = torch.cat([x_gen0, x_gen1], 0)
+        batch_targets = torch.cat([torch.zeros(remaining_samples), torch.ones(remaining_samples)], 0)
+
+        # Update train_data with remaining batch data
+        train_data.data[start_idx:end_idx] = batch_data
+        train_data.targets[start_idx:end_idx] = batch_targets
+
+        # Clear memory
+        del x_gen0, x_gen1, x_gen_store0, x_gen_store1
+        torch.cuda.empty_cache()
+
+  #plt.imshow(x_gen1[0].reshape(28,28).cpu(), cmap="gray")
+  #plt.show()
 
   return train_data
 
