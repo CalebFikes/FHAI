@@ -680,7 +680,7 @@ def Aug_SMOTE(train):
 
     return dta
 
-train, test = imbalance_data(train,test,2,3,1)
+train, test = imbalance_data(train,test,2,7,1)
 train_classifier(train,test,configs)
 
 
