@@ -140,7 +140,7 @@ configs = {
 'class_labels' : np.array([2,7])
 }
 torch.backends.cudnn.enabled = False
-device = 'cuda:1'
+device = 'cuda:0'
 
 
 # Define train loader and test loader
