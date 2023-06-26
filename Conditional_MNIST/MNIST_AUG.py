@@ -652,15 +652,15 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
 
   print("augmentation")
   #ddpm = ddpm.to("cpu") #remove for zuber
+  torch.cuda.empty_cache() #EXPERIMENTAL
   ddpm.eval()
   with torch.no_grad():
       x_gen0, x_gen_store0 = ddpm.sample(length, (1, 28, 28), "cuda:0", label=[0],guide_w=0.5) #set to "cuda:0" for zuber
       x_gen1, x_gen_store1 = ddpm.sample(length, (1, 28, 28), "cuda:0", label=[1],guide_w=0.5)
-  plt.imshow(x_gen[0].reshape(28,28).cpu(), cmap="gray")
-  plt.show()
-
   train_data.data = torch.cat([x_gen0, x_gen1], 0)
   train_data.targets = torch.cat([torch.zeros(length),torch.ones(length)], 0)
+  plt.imshow(x_gen1[0].reshape(28,28).cpu(), cmap="gray")
+  plt.show()
 
   return train_data
 
@@ -716,6 +716,32 @@ for trial in range(1):
     treat3 = train_classifier(SMOTE_data,test,configs)
     treat4 = train_classifier(Synth_data,test,configs)
     treat5 = train_classifier(bal_data,test,configs)
+
+    row_data = {
+    'f1_1' : treat1[0], 
+    'f1_2' : treat2[0],
+    'f1_3' : treat3[0], 
+    'f1_4' : treat4[0], 
+    'f1_5' : treat5[0], 
+    'recall_1' : treat1[1], 
+    'recall_2' : treat2[1], 
+    'recall_3' : treat3[1], 
+    'recall_4' : treat4[1], 
+    'recall_5' : treat5[1], 
+    'precision_1' : treat1[2], 
+    'precision_2' : treat2[2], 
+    'precision_3' : treat3[2], 
+    'precision_4' : treat4[2], 
+    'precision_5' : treat5[2], 
+    'auroc_1' : treat1[3],
+    'auroc_2': treat2[3],
+    'auroc_3' : treat3[3],
+    'auroc_4' : treat4[3],
+    'auroc_5' : treat5[3]
+    }
+
+
+    torch.cuda.empty_cache()
 """
 
 
