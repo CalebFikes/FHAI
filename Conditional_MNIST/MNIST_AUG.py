@@ -621,7 +621,7 @@ for trial in range(1):
     imb_data = imbalance_data(train,test, .1) #treatment1
 
     n_samples = len(imb_data)
-    bal_data = copy.deepcopy(imb_data) #make bal_data a torch dataset
+    bal_data = torchvision.datasets.MNIST(download = FALSE) #make bal_data a torch dataset
     bal_data.data = train.data[0:n_samples]
     bal_data.targets = train.targets[0:n_samples] #treatment0
 
