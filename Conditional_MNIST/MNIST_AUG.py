@@ -9,7 +9,7 @@ import pandas as pd
 import seaborn as sns
 import sklearn.metrics as sm
 from sklearn.metrics import f1_score
-import torchmetrics
+#import torchmetrics
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
