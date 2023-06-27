@@ -742,7 +742,7 @@ def Aug_SMOTE(train):
     """
     require torch.dataset object
     """
-    dta = torchvision.datasets.MNIST(download = False)
+    dta = torchvision.datasets.MNIST('data/', download = False)
     smote = SMOTE()
     X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets) # smote the dataset (must flatten to 2d first)
 
@@ -770,8 +770,8 @@ def Aug_SMOTE(train):
 
 
 
-dta = torchvision.datasets.MNIST(download = False)
-bal_dta = torchvision.datasets.MNIST(download = False) #make bal_data a torch dataset
+dta = torchvision.datasets.MNIST('data/',download = False)
+bal_dta = torchvision.datasets.MNIST('data/',download = False) #make bal_data a torch dataset
 df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5', 
                             'recall_1', 'recall_2', 'recall_3', 'recall_4', 'recall_5', 
                             'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
