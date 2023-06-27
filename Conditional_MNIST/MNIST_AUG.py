@@ -600,7 +600,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
         # Generate images
         x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
-        x_gen = x_gen#.to(device)
+        x_gen = x_gen.to("cpu")
 
         print(x_gen.data.shape, train_data.data.shape)
         # Concatenate generated images with existing data
@@ -620,7 +620,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
         # Generate remaining images
         x_gen, x_gen_store = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
-        x_gen = x_gen#.to(device)
+        x_gen = x_gen.to("cpu")
 
         # Concatenate remaining generated images with existing data
         #train_data.data = train_data.data.to(device)
@@ -695,11 +695,11 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         x_gen0, x_gen_store0 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen1, x_gen_store1 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
         
-        x_gen0,x_gen1 = x_gen0.squeeze(1).to(device), x_gen1.squeeze(1).to(device) #BREAKPOINT
+        x_gen0,x_gen1 = x_gen0.squeeze(1).to("cpu"), x_gen1.squeeze(1).to("cpu") 
 
         # Concatenate generated images
-        batch_data = torch.cat([x_gen0, x_gen1], 0)
-        batch_targets = torch.cat([torch.zeros(batch_size), torch.ones(batch_size)], 0)
+        batch_data = torch.vstack([x_gen0, x_gen1])
+        batch_targets = torch.hstack([torch.zeros(batch_size), torch.ones(batch_size)])
 
         # Update train_data with batch data
         train_data.data[start_idx:end_idx] = batch_data
@@ -719,11 +719,11 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         x_gen0, x_gen_store0 = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen1, x_gen_store1 = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
 
-        x_gen0,x_gen1 = x_gen0.squeeze(1).to(device), x_gen1.squeeze(1).to(device)
+        x_gen0,x_gen1 = x_gen0.squeeze(1).to("cpu"), x_gen1.squeeze(1).to("cpu")
 
         # Concatenate generated images
-        batch_data = torch.cat([x_gen0, x_gen1], 0) 
-        batch_targets = torch.cat([torch.zeros(remaining_samples), torch.ones(remaining_samples)], 0)
+        batch_data = torch.vstack([x_gen0, x_gen1]) 
+        batch_targets = torch.hstack([torch.zeros(remaining_samples), torch.ones(remaining_samples)])
 
         # Update train_data with remaining batch data
         train_data.data[start_idx:end_idx] = batch_data
