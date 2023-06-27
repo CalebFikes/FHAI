@@ -141,7 +141,7 @@ test=torchvision.datasets.MNIST('data/', train=False, download=True,
 #     return train, test
 
 class PrepareData:
-    def __init__(self, train_set, test_set):
+    def __init__(self, train_set, test_set, prop_keep):
         """
         Arguments:
             train_set (torch dataset object)
@@ -149,23 +149,40 @@ class PrepareData:
         Subsets data to select only desired classes, then imbalances training set, then refactors labels.
         Returns 4 float tensors
         """
-        self.train_data, self.train_targets = self.prepare_dataset(train_set)
-        self.test_data, self.test_targets = self.prepare_dataset(test_set)
+        self.train_data, self.train_targets = self.prepare_imbalanced_dataset(train_set, prop_keep)
+        self.test_data, self.test_targets = self.prepare_test_dataset(test_set)
 
-    def prepare_dataset(self, dataset):
+    def prepare_test_dataset(self, dataset):
         data, targets = dataset.data, dataset.targets
         data, targets = self.subset_data(data, targets)
         targets = self.refactor_labels(targets)
         return data.float(), targets.float()
+
+    def prepare_imbalanced_dataset(self, dataset, prop_keep):
+        data, targets = dataset.data, dataset.targets
+        data, targets = self.subset_data(data, targets)
+        data, targets = self.imbalance_data(data, targets, prop_keep)
+        targets = self.refactor_labels(targets)
+        return data.float(), targets.float()
+
     def subset_data(self, data, targets):
         selection = torch.logical_or(targets == 2, targets == 7)
         data = data[selection]
         targets = targets[selection]
         return data, targets
+
+    def imbalance_data(self, data, targets, prop_keep):
+        sample_probs = {'2': (1 - prop_keep), '7': 0}
+        idx_to_del = [i for i, label in enumerate(targets) if random.random() > sample_probs[str(label.item())]]
+        data = data[idx_to_del]
+        targets = targets[idx_to_del].type(torch.float)
+        return data, targets
+
     def refactor_labels(self, targets):
         targets[targets == 2.] = 0
         targets[targets == 7.] = 1
         return targets
+
 
 # Define simple CNN to classify dataset examples
 class Net(nn.Module):
@@ -525,7 +542,7 @@ def train_classifier(train, test, configs):
         model.eval()
         correct = 0 # count correct predictions
         train_loss.append(loss.item())
-        print(train_loss)
+        #print(loss.item())
         #writer.add_scalar('Training loss',
         #                        loss.item(),
         #                        epoch)
@@ -541,6 +558,7 @@ def train_classifier(train, test, configs):
                 preds += list(pred.cpu().numpy())
 
         test_acc = 100. * correct / len(test_loader.dataset)
+        print(test_acc)
         #writer.add_scalar('Test Accuracy', test_acc, epoch)
         confusion_mtx = sm.confusion_matrix(targets, preds)
         confusion_mtxes.append(confusion_mtx)
@@ -789,7 +807,7 @@ def Aug_SMOTE(train):
 #train, test = unbalance_data(train,test,class0=3,class1=7,prop_keep=.5)
 
 # Modify the data
-data_preparer = PrepareData(train, test)
+data_preparer = PrepareData(train, test, 1)
 train.data = data_preparer.train_data
 train.targets = data_preparer.train_targets
 test.data = data_preparer.test_data
@@ -815,7 +833,11 @@ df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5',
                             'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
                             'auroc_1','auroc_2','auroc_3','auroc_4','auroc_5'])
 for trial in range(1):
-    dta.data, dta.targets = imbalance_data(train, test, .1) #treatment1
+    data_preparer = PrepareData(train, test, .1)
+    train.data = data_preparer.train_data
+    train.targets = data_preparer.train_targets
+    test.data = data_preparer.test_data
+    test.targets = data_preparer.test_targets
 
     n_samples = len(dta.targets) 
     bal_dta.data = train.data[0:n_samples] #treatment5
