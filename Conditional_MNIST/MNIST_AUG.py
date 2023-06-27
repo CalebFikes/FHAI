@@ -37,8 +37,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 100, 
-'batch_size_train' : 1024, 
+'n_epochs' : 30, 
+'batch_size_train' : 64, 
 'batch_size_test' : 500, 
 'learning_rate' : 0.01, 
 'momentum' : 0.2, 
@@ -50,7 +50,7 @@ configs = {
 configs_DDPM = {
     'n_epoch' : 5,
     "batch_size" : 1024, 
-    'n_T' : 200, 
+    'n_T' : 100, 
     'device' : "cuda:0",
     'n_classes' : 2, 
     'n_feat' : 256, 
@@ -689,11 +689,11 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
     train_data.data.to(device)
     for i in range(num_batches):
         start_idx = i * batch_size
-        end_idx = (i + 1) * batch_size
+        end_idx = (i + 1) * batch_size - 1
 
         # Generate images
-        x_gen0, x_gen_store0 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
-        x_gen1, x_gen_store1 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
+        x_gen0, x_gen_store0 = ddpm.sample(batch_size/2, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
+        x_gen1, x_gen_store1 = ddpm.sample(batch_size/2, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
         
         x_gen0,x_gen1 = x_gen0.squeeze(1).to("cpu"), x_gen1.squeeze(1).to("cpu") 
 
