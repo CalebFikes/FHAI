@@ -757,7 +757,7 @@ def Aug_SMOTE(train):
 
 #=========================================================================
 
-train, test = imbalance_data(train,test,2,7,0)
+train, test = imbalance_data(train,test,2,7,1)
 
 #end_time = time.time()
 #print("Time Elapsed: ", end_time - start_time)
