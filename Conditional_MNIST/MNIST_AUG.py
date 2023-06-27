@@ -603,7 +603,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         x_gen = x_gen.to(device)
 
         # Concatenate generated images with existing data
-        train_data = train_data.to(device)
+        train_data.data = train_data.data.to(device)
         train_data.data = torch.cat([x_gen, train_data.data], 0)
         train_data.targets = torch.cat([torch.ones(batch_size), train_data.targets], 0)
 
@@ -622,7 +622,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         x_gen = x_gen.to(device)
 
         # Concatenate remaining generated images with existing data
-        train_data = train_data.to(device)
+        train_data.data = train_data.data.to(device)
         train_data.data = torch.cat([x_gen, train_data.data], 0)
         train_data.targets = torch.cat([torch.ones(remaining_samples), train_data.targets], 0)
 
@@ -701,7 +701,6 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         batch_targets = torch.cat([torch.zeros(batch_size), torch.ones(batch_size)], 0)
 
         # Update train_data with batch data
-        train_data = train_data.to(device)
         train_data.data[start_idx:end_idx] = batch_data
         train_data.targets[start_idx:end_idx] = batch_targets
 
@@ -726,7 +725,6 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         batch_targets = torch.cat([torch.zeros(remaining_samples), torch.ones(remaining_samples)], 0)
 
         # Update train_data with remaining batch data
-        train_data = train_data.to(device)
         train_data.data[start_idx:end_idx] = batch_data
         train_data.targets[start_idx:end_idx] = batch_targets
 
@@ -768,8 +766,8 @@ train_classifier(aug_data,test,configs)
 
 
 """
-dta = torchvision.datasets.MNIST(download = FALSE)
-bal_dta = torchvision.datasets.MNIST(download = FALSE) #make bal_data a torch dataset
+dta = torchvision.datasets.MNIST(download = False)
+bal_dta = torchvision.datasets.MNIST(download = False) #make bal_data a torch dataset
 #df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5', 
                             'recall_1', 'recall_2', 'recall_3', 'recall_4', 'recall_5', 
                             'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
@@ -816,6 +814,8 @@ for trial in range(1):
     'auroc_5' : treat5[3]
     }
 
+    df = df.append(row_data, ignore_index=True)
+    df.to_csv('Exp_Log.csv', index=False)
 
     torch.cuda.empty_cache()
 """
