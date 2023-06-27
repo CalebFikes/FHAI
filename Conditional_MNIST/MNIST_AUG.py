@@ -600,13 +600,13 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
         # Generate images
         x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
-        x_gen = x_gen.to(device)
+        x_gen = x_gen#.to(device)
 
         print(x_gen.data.shape, train_data.data.shape)
         # Concatenate generated images with existing data
-        train_data.data = train_data.data.to(device)
-        train_data.data = torch.cat([x_gen, train_data.data], 0)
-        train_data.targets = torch.cat([torch.ones(batch_size), train_data.targets], 0)
+        #train_data.data = train_data.data.to(device)
+        train_data.data = torch.vstack([train_data.data, x_gen])
+        train_data.targets = torch.hstack([train_data.targets, torch.zeros(batch_size)])
 
         # Clear memory
         del x_gen, x_gen_store
@@ -620,12 +620,12 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
         # Generate remaining images
         x_gen, x_gen_store = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
-        x_gen = x_gen.to(device)
+        x_gen = x_gen#.to(device)
 
         # Concatenate remaining generated images with existing data
-        train_data.data = train_data.data.to(device)
-        train_data.data = torch.cat([x_gen.squeeze(1), train_data.data], 0)
-        train_data.targets = torch.cat([torch.ones(remaining_samples), train_data.targets], 0)
+        #train_data.data = train_data.data.to(device)
+        train_data.data = torch.vstack([train_data.data, x_gen])
+        train_data.targets = torch.hstack([train_data.targets, torch.zeros(batch_size)])
 
         # Clear memory
         del x_gen, x_gen_store
@@ -695,7 +695,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         x_gen0, x_gen_store0 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen1, x_gen_store1 = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
         
-        x_gen0,x_gen1 = x_gen0.squeeze(1).to(device), x_gen1.squeeze(1).to(device)
+        x_gen0,x_gen1 = x_gen0.squeeze(1).to(device), x_gen1.squeeze(1).to(device) #BREAKPOINT
 
         # Concatenate generated images
         batch_data = torch.cat([x_gen0, x_gen1], 0)
@@ -722,7 +722,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         x_gen0,x_gen1 = x_gen0.squeeze(1).to(device), x_gen1.squeeze(1).to(device)
 
         # Concatenate generated images
-        batch_data = torch.cat([x_gen0, x_gen1], 0)
+        batch_data = torch.cat([x_gen0, x_gen1], 0) 
         batch_targets = torch.cat([torch.zeros(remaining_samples), torch.ones(remaining_samples)], 0)
 
         # Update train_data with remaining batch data
