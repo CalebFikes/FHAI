@@ -757,19 +757,19 @@ def Aug_SMOTE(train):
 
 #=========================================================================
 
-# train, test = imbalance_data(train,test,2,7,0)
+train, test = imbalance_data(train,test,2,7,0)
 
-# end_time = time.time()
-# print("Time Elapsed: ", end_time - start_time)
-# aug_data = Aug(train, .1, configs_DDPM) #treatment2
-# #Synth_data = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
+aug_data = Aug(train, .1, configs_DDPM) #treatment2
+#Synth_data = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
 
-# end_time = time.time()
-# print("Time Elapsed: ", end_time - start_time)
-# train_classifier(aug_data,test,configs)
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
+train_classifier(aug_data,test,configs)
 
 
-
+"""
 dta = torchvision.datasets.MNIST('data/',download = False)
 bal_dta = torchvision.datasets.MNIST('data/',download = False) #make bal_data a torch dataset
 df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5', 
@@ -822,6 +822,8 @@ for trial in range(1):
     df.to_csv('Exp_Log.csv', index=False)
 
     torch.cuda.empty_cache()
+"""
+
 
 
 
