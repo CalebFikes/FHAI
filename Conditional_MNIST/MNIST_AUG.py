@@ -603,7 +603,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
   print(n, n_gen)
 
   print("training generator")
-  ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
+  ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, drop_prob=0.1)
 
   dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
@@ -611,7 +611,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
   for ep in range(n_epoch):
       print(f'epoch {ep}')
-      ddpm.train()
+      ddpm.train().to(device)
 
       # linear lrate decay
       optim.param_groups[0]['lr'] = lrate*(1-ep/n_epoch)
