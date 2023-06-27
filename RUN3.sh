@@ -23,7 +23,8 @@ pip install  torchmetrics
 #tensorboard --logdir {'/local/scratch/cfikes/FHAI_3/Conditional_MNIST/logs/'}  --host localhost # REPLACE THE STRING IN BRACKETS WITH PATH TO STORE LOGS.
 
 # Change to the project directory
-cd /local/scratch/kbehal/FHAI/Conditional_MNIST
+#cd /local/scratch/kbehal/FHAI/Conditional_MNIST
+cd /local/scratch/cfikes/FHAI_3/Conditional_MNIST
 
 # Run the Python script
 python3.8 MNIST_AUG.py

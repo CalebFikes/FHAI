@@ -519,7 +519,7 @@ def train_classifier(train, test, configs):
         test_accs.append(test_acc)
         auroc = auroc_metric(torch.Tensor(preds), torch.Tensor(targets))
         auroc_list.append(auroc)
-        print(epoch)
+        #print(epoch)
     print(f'\rBest test acc {max(test_accs)}', end='', flush=True)
 
 
@@ -553,7 +553,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
   n= len(train_data.data)
   n_gen = math.ceil((1 - prop_keep) * n)
-  print(n, n_gen)
+  #print(n, n_gen)
 
   print("training generator")
   ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
@@ -563,7 +563,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
   optim = torch.optim.Adam(ddpm.parameters(), lr=lrate)
 
   for ep in range(n_epoch):
-      print(f'epoch {ep}')
+      #print(f'epoch {ep}')
       ddpm.train()
 
       # linear lrate decay
@@ -602,7 +602,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen = x_gen.to("cpu")
 
-        print(x_gen.data.shape, train_data.data.shape)
+        #print(x_gen.data.shape, train_data.data.shape)
         # Concatenate generated images with existing data
         #train_data.data = train_data.data.to(device)
         train_data.data = torch.vstack([train_data.data, x_gen.squeeze(1)])
@@ -656,7 +656,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
   optim = torch.optim.Adam(ddpm.parameters(), lr=lrate)
 
   for ep in range(n_epoch):
-      print(f'epoch {ep}')
+      #print(f'epoch {ep}')
       ddpm.train()
 
       # linear lrate decay
@@ -786,7 +786,7 @@ for trial in range(1):
     aug_data = Aug(train, prop, configs_DDPM) #treatment2
 
     SMOTE_data = Aug_SMOTE(train) #treatment3
-    
+
     Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
 
     treat1 = train_classifier(train,test,configs)
