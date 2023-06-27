@@ -757,16 +757,16 @@ def Aug_SMOTE(train):
 
 #=========================================================================
 
-#train, test = imbalance_data(train,test,2,7,0)
+train, test = imbalance_data(train,test,2,7,0)
 
 #end_time = time.time()
 #print("Time Elapsed: ", end_time - start_time)
-aug_data = Aug(train, 1, configs_DDPM) #treatment2
+#aug_data = Aug(train, 1, configs_DDPM) #treatment2
 #Synth_data = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
-train_classifier(aug_data,test,configs)
+train_classifier(train,test,configs)
 
 
 """

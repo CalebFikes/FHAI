@@ -786,7 +786,7 @@ for trial in range(1):
     aug_data = Aug(train, prop, configs_DDPM) #treatment2
 
     SMOTE_data = Aug_SMOTE(train) #treatment3
-    #a comment
+    
     Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
 
     treat1 = train_classifier(train,test,configs)
