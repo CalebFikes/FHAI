@@ -44,7 +44,8 @@ configs = {
 'momentum' : 0.2, 
 'log_interval' : 10,
 'class_labels' : np.array([2,7]),
-'w' : .1
+'w' : .1,
+'n_classes' : 10
 }
 
 configs_DDPM = {
@@ -52,7 +53,7 @@ configs_DDPM = {
     "batch_size" : 64, 
     'n_T' : 100, 
     'device' : "cuda:0",
-    'n_classes' : 2, 
+    'n_classes' : 10, 
     'n_feat' : 256, 
     'lrate' : 1e-3,
     'w' : .1
@@ -569,9 +570,9 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
       # linear lrate decay
       optim.param_groups[0]['lr'] = lrate*(1-ep/n_epoch)
 
-      pbar = tqdm(dataloader, position=0, leave=True)
+      #pbar = tqdm(dataloader, position=0, leave=True)
       loss_ema = None
-      for x, c in pbar:
+      for x, c in dataloader:
           optim.zero_grad()
           x = x.to(device)
           c = c.to(device)
@@ -581,7 +582,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
               loss_ema = loss.item()
           else:
               loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
-          pbar.set_description(f"loss: {loss_ema:.4f}")
+          #pbar.set_description(f"loss: {loss_ema:.4f}")
           optim.step()
 
   torch.save(ddpm.state_dict(), f"model_{ep}.pth")

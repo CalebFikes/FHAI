@@ -569,9 +569,9 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
       # linear lrate decay
       optim.param_groups[0]['lr'] = lrate*(1-ep/n_epoch)
 
-      pbar = tqdm(dataloader)
+      #pbar = tqdm(dataloader)
       loss_ema = None
-      for x, c in pbar:
+      for x, c in dataloader:
           optim.zero_grad()
           x = x.to(device)
           c = c.to(device)
@@ -581,7 +581,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
               loss_ema = loss.item()
           else:
               loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
-          pbar.set_description(f"loss: {loss_ema:.4f}")
+          #pbar.set_description(f"loss: {loss_ema:.4f}")
           optim.step()
 
   torch.save(ddpm.state_dict(), f"model_{ep}.pth")
