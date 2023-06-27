@@ -114,7 +114,7 @@ class PrepareData:
         return data.float(), targets.float()
 
     def subset_data(self, data, targets,class0,class1):
-        selection = torch.logical_or(targets == class0, targets == class1)
+        selection = torch.logical_or(targets == float(class0), targets == float(class1))
         data = data[selection]
         targets = targets[selection]
         return data, targets

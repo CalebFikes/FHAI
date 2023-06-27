@@ -807,7 +807,7 @@ def Aug_SMOTE(train):
 #train, test = unbalance_data(train,test,class0=3,class1=7,prop_keep=.5)
 
 # Modify the data
-data_preparer = PrepareData(train, test, 1)
+data_preparer = PrepareData(train, test, .1)
 train.data = data_preparer.train_data
 train.targets = data_preparer.train_targets
 test.data = data_preparer.test_data
