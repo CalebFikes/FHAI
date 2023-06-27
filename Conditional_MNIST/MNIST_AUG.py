@@ -37,11 +37,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 50, 
-'batch_size_train' : 256, 
+'n_epochs' : 10, 
+'batch_size_train' : 32, 
 'batch_size_test' : 1000, 
-'learning_rate' : 0.001, 
-'momentum' : 0.9, 
+'learning_rate' : 0.01, 
+'momentum' : 0.4, 
 'log_interval' : 10,
 'class_labels' : np.array([2,7]),
 'w' : .7,
@@ -50,7 +50,7 @@ configs = {
 
 configs_DDPM = {
     'n_epoch' : 50,
-    "batch_size" : 64, 
+    "batch_size" : 512, 
     'n_T' : 100, 
     'device' : "cuda:0",
     'n_classes' : 10, 
@@ -815,9 +815,9 @@ test.targets = data_preparer.test_targets
 
 print(torch.unique(train.targets, return_counts = True))
 
-#end_time = time.time()
-#print("Time Elapsed: ", end_time - start_time)
-#aug_data = Aug(train, 1, configs_DDPM) #treatment2
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
+aug_data = Aug(train, 1, configs_DDPM) #treatment2
 #Synth_data = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
 
 end_time = time.time()
