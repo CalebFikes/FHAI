@@ -605,7 +605,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         print(x_gen.data.shape, train_data.data.shape)
         # Concatenate generated images with existing data
         #train_data.data = train_data.data.to(device)
-        train_data.data = torch.vstack([train_data.data.unsqueeze(), x_gen])
+        train_data.data = torch.vstack([train_data.data.unsqueeze(1), x_gen])
         train_data.targets = torch.hstack([train_data.targets, torch.zeros(batch_size)])
 
         # Clear memory
@@ -624,7 +624,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
         # Concatenate remaining generated images with existing data
         #train_data.data = train_data.data.to(device)
-        train_data.data = torch.vstack([train_data.data.unsqueeze(), x_gen])
+        train_data.data = torch.vstack([train_data.data.unsqueeze(1), x_gen])
         train_data.targets = torch.hstack([train_data.targets, torch.zeros(batch_size)])
 
         # Clear memory
