@@ -569,7 +569,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
       # linear lrate decay
       optim.param_groups[0]['lr'] = lrate*(1-ep/n_epoch)
 
-      pbar = tqdm(dataloader)
+      pbar = tqdm(dataloader, position=0, leave=True)
       loss_ema = None
       for x, c in pbar:
           optim.zero_grad()
@@ -768,7 +768,7 @@ def Aug_SMOTE(train):
 # print("Time Elapsed: ", end_time - start_time)
 # train_classifier(aug_data,test,configs)
 
-
+prop = .1
 
 dta = torchvision.datasets.MNIST('data/',download = False)
 bal_dta = torchvision.datasets.MNIST('data/',download = False) #make bal_data a torch dataset
@@ -777,13 +777,13 @@ df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5',
                             'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
                             'auroc_1','auroc_2','auroc_3','auroc_4','auroc_5'])
 for trial in range(1):
-    dta.data, dta.targets = imbalance_data(train, test, .1) #treatment1
+    dta.data, dta.targets = imbalance_data(train, test, prop) #treatment1
 
     n_samples = len(dta.targets) 
     bal_dta.data = train.data[0:n_samples] #treatment5
     bal_dta.targets = train.targets[0:n_samples] 
 
-    aug_data = Aug(dta, .1, configs_DDPM) #treatment2
+    aug_data = Aug(dta, prop, configs_DDPM) #treatment2
 
     SMOTE_data = Aug_SMOTE(dta) #treatment3
 
