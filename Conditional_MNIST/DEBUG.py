@@ -557,7 +557,6 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
   print("training generator")
   ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
-  ddpm.to(device)
 
   dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
