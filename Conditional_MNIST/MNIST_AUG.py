@@ -602,7 +602,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen = x_gen.to(device)
 
-        print(x_gen.shape, train_data.shape)
+        print(x_gen.data.shape, train_data.shape)
         # Concatenate generated images with existing data
         train_data.data = train_data.data.to(device)
         train_data.data = torch.cat([x_gen, train_data.data], 0)
