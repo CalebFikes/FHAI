@@ -38,13 +38,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # configs
 configs = {
 'n_epochs' : 30, 
-'batch_size_train' : 64, 
+'batch_size_train' : 1024, 
 'batch_size_test' : 500, 
-'learning_rate' : 0.01, 
+'learning_rate' : 0.1, 
 'momentum' : 0.2, 
 'log_interval' : 10,
 'class_labels' : np.array([2,7]),
-'w' : .1,
+'w' : .5,
 'n_classes' : 10
 }
 
