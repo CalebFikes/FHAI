@@ -603,6 +603,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         x_gen = x_gen.to(device)
 
         # Concatenate generated images with existing data
+        train_data = train_data.to(device)
         train_data.data = torch.cat([x_gen, train_data.data], 0)
         train_data.targets = torch.cat([torch.ones(batch_size), train_data.targets], 0)
 
@@ -621,6 +622,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         x_gen = x_gen.to(device)
 
         # Concatenate remaining generated images with existing data
+        train_data = train_data.to(device)
         train_data.data = torch.cat([x_gen, train_data.data], 0)
         train_data.targets = torch.cat([torch.ones(remaining_samples), train_data.targets], 0)
 
@@ -643,10 +645,6 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
   w = configs['w']
 
   length = length // 2
-
-  n= train_data.data.shape[0]
-  n_gen = math.ceil((1 - prop_keep) * n)
-  print(n, n_gen)
 
   print("training generator")
   ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
@@ -703,6 +701,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         batch_targets = torch.cat([torch.zeros(batch_size), torch.ones(batch_size)], 0)
 
         # Update train_data with batch data
+        train_data = train_data.to(device)
         train_data.data[start_idx:end_idx] = batch_data
         train_data.targets[start_idx:end_idx] = batch_targets
 
@@ -727,6 +726,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         batch_targets = torch.cat([torch.zeros(remaining_samples), torch.ones(remaining_samples)], 0)
 
         # Update train_data with remaining batch data
+        train_data = train_data.to(device)
         train_data.data[start_idx:end_idx] = batch_data
         train_data.targets[start_idx:end_idx] = batch_targets
 
@@ -757,6 +757,7 @@ def Aug_SMOTE(train):
     return dta
 
 train, test = imbalance_data(train,test,2,7,1)
+
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
 aug_data = Aug(train, .1, configs_DDPM) #treatment2
