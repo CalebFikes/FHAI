@@ -692,8 +692,8 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         end_idx = (i + 1) * batch_size - 1
 
         # Generate images
-        x_gen0, x_gen_store0 = ddpm.sample(batch_size/2, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
-        x_gen1, x_gen_store1 = ddpm.sample(batch_size/2, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
+        x_gen0, x_gen_store0 = ddpm.sample(int(batch_size/2), (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
+        x_gen1, x_gen_store1 = ddpm.sample(int(batch_size/2), (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
         
         x_gen0,x_gen1 = x_gen0.squeeze(1).to("cpu"), x_gen1.squeeze(1).to("cpu") 
 
@@ -716,8 +716,8 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
         end_idx = num_batches * batch_size + remaining_samples
 
         # Generate images
-        x_gen0, x_gen_store0 = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
-        x_gen1, x_gen_store1 = ddpm.sample(remaining_samples, (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
+        x_gen0, x_gen_store0 = ddpm.sample(int(remaining_samples/2), (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
+        x_gen1, x_gen_store1 = ddpm.sample(int(remaining_samples/2), (1, 28, 28), "cuda:0", label=[1], guide_w=0.5)
 
         x_gen0,x_gen1 = x_gen0.squeeze(1).to("cpu"), x_gen1.squeeze(1).to("cpu")
 
