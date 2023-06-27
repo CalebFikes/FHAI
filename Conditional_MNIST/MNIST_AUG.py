@@ -37,14 +37,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 45, 
-'batch_size_train' : 128, 
-'batch_size_test' : 500, 
-'learning_rate' : 0.01, 
-'momentum' : 0.5, 
+'n_epochs' : 50, 
+'batch_size_train' : 256, 
+'batch_size_test' : 1000, 
+'learning_rate' : 0.001, 
+'momentum' : 0.9, 
 'log_interval' : 10,
 'class_labels' : np.array([2,7]),
-'w' : .5,
+'w' : .7,
 'n_classes' : 10
 }
 
@@ -86,8 +86,62 @@ test=torchvision.datasets.MNIST('data/', train=False, download=True,
 #writer = SummaryWriter('logs/MNIST_imbalanced') # path to directory containing run data
 
 
+# class PrepareData:
+#     def __init__(self, train_set, test_set, class0=2, class1=7, prop_keep = 1):
+#         """
+#         Arguments:
+#             train_set (torch dataset object)
+#             test_set (torch dataset object):
+#         Subsets data to select only desired classes, then imbalances training set, then refactors labels.
+#         Returns 4 float tensors
+#         """
+#         self.train_data, self.train_targets = self.prepare_imbalanced_dataset(train_set, class0, class1, prop_keep)
+#         self.test_data, self.test_targets = self.prepare_test_dataset(test_set,class0,class1)
+#         self.class0 = class0
+#         self.class1 = class1
+
+#     def prepare_test_dataset(self, dataset,class0,class1):
+#         data, targets = dataset.data, dataset.targets
+#         data, targets = self.subset_data(data, targets,class0,class1)
+#         targets = self.refactor_labels(targets, class0, class1)
+#         return data.float(), targets.float()
+
+#     def prepare_imbalanced_dataset(self, dataset, prop_keep,class0,class1):
+#         data, targets = dataset.data, dataset.targets
+#         data, targets = self.subset_data(data, targets, class0, class1)
+#         data, targets = self.imbalance_data(data, targets, class0, class1, prop_keep)
+#         targets = self.refactor_labels(targets, class0, class1)
+#         return data.float(), targets.float()
+
+#     def subset_data(self, data, targets,class0,class1):
+#         selection = torch.logical_or(targets == float(class0), targets == float(class1))
+#         data = data[selection]
+#         targets = targets[selection]
+#         return data, targets
+
+#     def imbalance_data(self, data, targets, class0, class1, prop_keep):
+#         sample_probs = {str(class0): (1 - prop_keep), str(class1): 0} #BREAKPOINT   
+#         idx_to_keep = [i for i, label in enumerate(targets) if random.random() > sample_probs[str(label.item())]]
+#         data = data[idx_to_keep]
+#         targets = targets[idx_to_keep].type(torch.float)
+#         return data, targets
+
+#     def refactor_labels(self, targets, class0, class1):
+#         targets[targets == float(class0)] = 0
+#         targets[targets == float(class1)] = 1
+#         return targets
+
+# def unbalance_data(train,test,class0=2,class1=7,prop_keep = 1):
+#     # Modify the data
+#     data_preparer = PrepareData(train, test, class0, class1, prop_keep)
+#     train.data = data_preparer.train_data
+#     train.targets = data_preparer.train_targets
+#     test.data = data_preparer.test_data
+#     test.targets = data_preparer.test_targets
+#     return train, test
+
 class PrepareData:
-    def __init__(self, train_set, test_set, class0=2, class1=7, prop_keep = 1):
+    def __init__(self, train_set, test_set):
         """
         Arguments:
             train_set (torch dataset object)
@@ -95,51 +149,23 @@ class PrepareData:
         Subsets data to select only desired classes, then imbalances training set, then refactors labels.
         Returns 4 float tensors
         """
-        self.train_data, self.train_targets = self.prepare_imbalanced_dataset(train_set, class0, class1, prop_keep)
-        self.test_data, self.test_targets = self.prepare_test_dataset(test_set,class0,class1)
-        self.class0 = class0
-        self.class1 = class1
+        self.train_data, self.train_targets = self.prepare_dataset(train_set)
+        self.test_data, self.test_targets = self.prepare_dataset(test_set)
 
-    def prepare_test_dataset(self, dataset,class0,class1):
+    def prepare_dataset(self, dataset):
         data, targets = dataset.data, dataset.targets
-        data, targets = self.subset_data(data, targets,class0,class1)
-        targets = self.refactor_labels(targets, class0, class1)
+        data, targets = self.subset_data(data, targets)
+        targets = self.refactor_labels(targets)
         return data.float(), targets.float()
-
-    def prepare_imbalanced_dataset(self, dataset, prop_keep,class0,class1):
-        data, targets = dataset.data, dataset.targets
-        data, targets = self.subset_data(data, targets, class0, class1)
-        data, targets = self.imbalance_data(data, targets, class0, class1, prop_keep)
-        targets = self.refactor_labels(targets, class0, class1)
-        return data.float(), targets.float()
-
-    def subset_data(self, data, targets,class0,class1):
-        selection = torch.logical_or(targets == class0, targets == class1)
+    def subset_data(self, data, targets):
+        selection = torch.logical_or(targets == 2, targets == 7)
         data = data[selection]
         targets = targets[selection]
         return data, targets
-
-    def imbalance_data(self, data, targets, class0, class1, prop_keep):
-        sample_probs = {str(class0): (1 - prop_keep), str(class1): 0}
-        idx_to_del = [i for i, label in enumerate(targets) if random.random() > sample_probs[str(label.item())]]
-        data = data[idx_to_del]
-        targets = targets[idx_to_del].type(torch.float)
-        return data, targets
-
-    def refactor_labels(self, targets, class0, class1):
-        targets[targets == float(class0)] = 0
-        targets[targets == float(class1)] = 1
+    def refactor_labels(self, targets):
+        targets[targets == 2.] = 0
+        targets[targets == 7.] = 1
         return targets
-
-def imbalance_data(train,test,class0=2,class1=7,prop_keep = 1):
-    # Modify the data
-    data_preparer = PrepareData(train, test, class0, class1, prop_keep) #, 0.1)
-    train.data = data_preparer.train_data
-    train.targets = data_preparer.train_targets
-    test.data = data_preparer.test_data
-    test.targets = data_preparer.test_targets
-    return train, test
-
 
 # Define simple CNN to classify dataset examples
 class Net(nn.Module):
@@ -159,6 +185,7 @@ class Net(nn.Module):
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
+        
 
 def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):
     cm = confusion_mtxes[np.argmax(test_accs)] # select the best run (highest test accuracy); cm is the array of raw counts for confusion matrix
@@ -489,7 +516,7 @@ def train_classifier(train, test, configs):
         for batch_idx, (data, target) in enumerate(pbar):
             data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
             optimizer.zero_grad()
-            output = model(data).to(device)
+            output = model(data)
             loss = loss_fn(output, target)
             loss.backward()
             optimizer.step()
@@ -498,19 +525,20 @@ def train_classifier(train, test, configs):
         model.eval()
         correct = 0 # count correct predictions
         train_loss.append(loss.item())
+        print(train_loss)
         #writer.add_scalar('Training loss',
-        #                       loss.item(),
+        #                        loss.item(),
         #                        epoch)
         targets, preds = [], []
         with torch.no_grad():
             for data, target in test_loader:
-                data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
+                data, target = data, target # since I'm using CPU, I do not push these tensors to device 
                 output = model(data)
                 _, pred = torch.max(output,dim=1)
                 correct += pred.eq(target.view_as(pred)).sum().item()
 
-                targets += list(target.to("cpu").numpy())
-                preds += list(pred.to("cpu").numpy())
+                targets += list(target.cpu().numpy())
+                preds += list(pred.cpu().numpy())
 
         test_acc = 100. * correct / len(test_loader.dataset)
         #writer.add_scalar('Test Accuracy', test_acc, epoch)
@@ -521,6 +549,7 @@ def train_classifier(train, test, configs):
         auroc_list.append(auroc)
         print(epoch)
     print(f'\rBest test acc {max(test_accs)}', end='', flush=True)
+    print(confusion_mtxes[-1])
 
 
     # Calculate AUROC, f1, precision, recall
@@ -757,7 +786,16 @@ def Aug_SMOTE(train):
 
 #=========================================================================
 
-train, test = imbalance_data(train,test,2,7,1)
+#train, test = unbalance_data(train,test,class0=3,class1=7,prop_keep=.5)
+
+# Modify the data
+data_preparer = PrepareData(train, test)
+train.data = data_preparer.train_data
+train.targets = data_preparer.train_targets
+test.data = data_preparer.test_data
+test.targets = data_preparer.test_targets
+
+print(torch.unique(train.targets, return_counts = True))
 
 #end_time = time.time()
 #print("Time Elapsed: ", end_time - start_time)
