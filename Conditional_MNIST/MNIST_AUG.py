@@ -550,7 +550,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
   lrate = configs['lrate']
   w = configs['w']
 
-  n= train_data.data.shape[0]
+  n= len(train_data.data)
   n_gen = math.ceil((1 - prop_keep) * n)
   print(n, n_gen)
 
