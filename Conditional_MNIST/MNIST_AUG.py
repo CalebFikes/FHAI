@@ -778,6 +778,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
     # If there's any remaining samples
     remaining_samples = length % batch_size
     if remaining_samples > 0:
+        remaining_samples = (remaining_samples // 2) * 2
         start_idx = num_batches * batch_size
         end_idx = num_batches * batch_size + remaining_samples
 
@@ -789,7 +790,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
 
         # Concatenate generated images
         batch_data = torch.vstack([x_gen0, x_gen1]) 
-        batch_targets = torch.hstack([torch.zeros(remaining_samples), torch.ones(remaining_samples)])
+        batch_targets = torch.hstack([torch.zeros(remaining_samples/2), torch.ones(remaining_samples)])
 
         # Update train_data with remaining batch data
         train_data.data[start_idx:end_idx] = batch_data
