@@ -797,7 +797,7 @@ def Aug_SMOTE(train):
 
     X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets)  # Smote the dataset (must flatten to 2d first)
 
-    X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
+   # X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
 
     X_tensor = torch.from_numpy(X).float().detach().cpu().numpy()  # Convert X to a NumPy array
     y_tensor = torch.from_numpy(y).type(torch.LongTensor).detach().cpu().numpy()  # Convert y to a NumPy array
