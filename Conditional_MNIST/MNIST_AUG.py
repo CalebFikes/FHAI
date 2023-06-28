@@ -49,13 +49,13 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 20,
+    'n_epoch' : 25,
     "batch_size" : 1024, 
     'n_T' : 100, 
     'device' : "cuda:0",
     'n_classes' : 10, 
     'n_feat' : 256, 
-    'lrate' : 1e-3,
+    'lrate' : 1e-2,
     'w' : .7
 }
 
