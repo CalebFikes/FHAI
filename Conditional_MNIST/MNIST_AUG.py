@@ -514,7 +514,7 @@ def train_classifier(train, test, configs):
     torch.backends.cudnn.enabled = False
 
     # Define train loader and test loader
-    print(type(train))
+    #print(type(train))
     train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True)
     test_loader = torch.utils.data.DataLoader(test, batch_size=configs['batch_size_test'], shuffle=True)
 
@@ -794,18 +794,19 @@ def Aug_SMOTE(train):
     require torch.dataset object
     """
     dta = torchvision.datasets.MNIST('data/', download=False)
+    print(type(dta.data), type(dta.targets))
     smote = SMOTE()
 
     X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets)  # Smote the dataset (must flatten to 2d first)
 
-   # X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
+    X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
 
-    X_tensor = torch.from_numpy(X).float().detach().cpu().numpy()  # Convert X to a NumPy array
-    y_tensor = torch.from_numpy(y).type(torch.LongTensor).detach().cpu().numpy()  # Convert y to a NumPy array
+    X_tensor = torch.from_numpy(X).float().requires_grad_(True)  # Convert X to a NumPy array
+    y_tensor = torch.from_numpy(y).type(torch.LongTensor)  # Convert y to a NumPy array
 
     dta.data = X_tensor
     dta.targets = y_tensor
-
+    print(type(dta.data), type(dta.targets))
     print(type(dta))
     return dta
 
