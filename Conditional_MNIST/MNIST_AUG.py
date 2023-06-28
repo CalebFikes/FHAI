@@ -531,8 +531,8 @@ def train_classifier(train, test, configs):
         print(epoch)
         model.train()
         logging.info(f"Starting epoch {epoch}:")
-        pbar = tqdm(train_loader, position=0, leave=True)
-        for batch_idx, (data, target) in enumerate(pbar):
+        #pbar = tqdm(train_loader, position=0, leave=True)
+        for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
             optimizer.zero_grad()
             output = model(data)
