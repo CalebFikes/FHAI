@@ -793,7 +793,8 @@ def Aug_SMOTE(train):
     """
     dta = torchvision.datasets.MNIST('data/', download = False)
     smote = SMOTE()
-    X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets) # smote the dataset (must flatten to 2d first)
+    print(train.data.shape, len(train.targets))
+    X, y = smote.fit_resample(train.data.squeeze(1), train.targets) # smote the dataset (must flatten to 2d first)
 
     X = np.reshape(X, (len(X), 28, 28)) # reshape X to 3d
 
