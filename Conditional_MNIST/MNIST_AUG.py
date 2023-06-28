@@ -208,10 +208,10 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
         
 
-def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):
-    cm = confusion_mtxes[np.argmax(test_accs)] # select the best run (highest test accuracy); cm is the array of raw counts for confusion matrix
+def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5), save_path=None):
+    cm = confusion_mtxes[np.argmax(test_accs)]
     cm_sum = np.sum(cm, axis=1, keepdims=True)
-    cm_perc = cm / cm_sum * 100 # cm_perc is the values for the confusion matrix
+    cm_perc = cm / cm_sum * 100
     annot = np.empty_like(cm).astype(str)
     nrows, ncols = cm.shape
     for i in range(nrows):
@@ -243,6 +243,10 @@ def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):
 
     plt.subplot(1, 3, 3)
     sns.heatmap(cm_df, annot=annot, fmt='', cmap="Blues")
+
+    if save_path:
+        plt.savefig(save_path, dpi=300)
+
     plt.show()
     return fig
 
@@ -579,6 +583,7 @@ def train_classifier(train, test, configs, smote=False):
         #print(epoch)
     print(f'\rBest test acc {max(test_accs)}', end='\n', flush=True)
     print(confusion_mtxes[-1])
+    vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'])
 
 
     # Calculate AUROC, f1, precision, recall
@@ -855,6 +860,42 @@ def Aug_SMOTE(train):
 
     return train
 
+def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):
+    cm = confusion_mtxes[np.argmax(test_accs)]
+    cm_sum = np.sum(cm, axis=1, keepdims=True)
+    cm_perc = cm / cm_sum * 100
+    annot = np.empty_like(cm).astype(str)
+    nrows, ncols = cm.shape
+    for i in range(nrows):
+        for j in range(ncols):
+            c = cm[i, j]
+            p = cm_perc[i, j]
+            if c == 0:
+                annot[i, j] = ''
+            else:
+                annot[i, j] = '%.1f%%' % p
+    cm = pd.DataFrame(cm, index=labels, columns=labels)
+    cm.index.name = 'Actual'
+    cm.columns.name = 'Predicted'
+
+    fig = plt.figure(figsize=figsize)
+
+    plt.subplot(1, 3, 1)
+    plt.title('Training Loss')
+    plt.xlabel('Epoch')
+    plt.semilogy(train_loss, 'r')
+    plt.ylabel('Log training loss')
+
+    plt.subplot(1, 3, 2)
+    plt.title('Test Accuracy (%)')
+    plt.xlabel('Epoch')
+    plt.ylabel('% accurate')
+    plt.plot(test_accs, 'g')
+    plt.grid(True)
+
+    plt.subplot(1, 3, 3)
+    sns.heatmap(cm, annot=annot, fmt='', cmap="Blues")
+    plt.show()
 
 
 
