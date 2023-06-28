@@ -18,6 +18,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
 import torchvision
 from torchvision import models, transforms
 from torchvision.datasets import MNIST
@@ -26,6 +27,8 @@ from torchvision.utils import save_image, make_grid
 from tqdm import tqdm
 from tqdm.notebook import tqdm
 from imblearn.over_sampling import SMOTE
+import PIL
+from PIL import Image
 
 #import torch.utils.tensorboard
 #from torch.utils.tensorboard import SummaryWriter
@@ -510,12 +513,15 @@ class DDPM(nn.Module):
         x_i_store = np.array(x_i_store)
         return x_i, x_i_store
     
-def train_classifier(train, test, configs):
+def train_classifier(train, test, configs, smote=False):
     torch.backends.cudnn.enabled = False
 
     # Define train loader and test loader
     #print(type(train))
-    train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True)
+    if smote:
+        train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True, collate_fn=custom_collate)
+    else:
+        train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True)
     test_loader = torch.utils.data.DataLoader(test, batch_size=configs['batch_size_test'], shuffle=True)
 
     # Define loss function
@@ -534,7 +540,9 @@ def train_classifier(train, test, configs):
         logging.info(f"Starting epoch {epoch}:")
         #pbar = tqdm(train_loader, position=0, leave=True)
         for batch_idx, (data, target) in enumerate(train_loader):
-            data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
+            data, target = data.to(torch.float).to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
+            if smote:
+                data = data.unsqueeze(1)
             optimizer.zero_grad()
             output = model(data)
             loss = loss_fn(output, target)
@@ -789,18 +797,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
 
   return train_data
 
-class AugmentedMNIST(torch.utils.data.Dataset):
-    def __init__(self, mnist_dataset):
-        self.data = mnist_dataset.data
-        self.targets = mnist_dataset.targets
 
-    def __len__(self):
-        return len(self.targets)
-
-    def __getitem__(self, index):
-        image = self.data[index]
-        target = self.targets[index]
-        return image, target
 
 # def Aug_SMOTE(train):
 #     smote = SMOTE()
@@ -818,6 +815,31 @@ class AugmentedMNIST(torch.utils.data.Dataset):
 #     augmented_dataset.targets = y_tensor
 
 #     return augmented_dataset
+
+
+def custom_collate(batch):
+    if isinstance(batch[0][0], PIL.Image.Image):
+        # Convert PIL Images to tensors
+        batch = [(torch.tensor(np.array(image)), target) for image, target in batch]
+    return torch.utils.data.dataloader.default_collate(batch)
+
+class AugmentedMNIST(Dataset):
+    def __init__(self, data, targets):
+        self.data = data
+        self.targets = targets
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, index):
+        image = self.data[index]
+        target = self.targets[index]
+        if image.ndim > 2:
+            image = np.mean(image.numpy(), axis=0)
+        else:
+            image = image.squeeze().numpy()
+        image = Image.fromarray(image.astype(np.uint8), mode='L')
+        return image, torch.tensor(target, dtype=torch.long).clone().detach()
 
 def Aug_SMOTE(dataset):
     # Convert MNIST dataset to NumPy arrays
@@ -837,17 +859,17 @@ def Aug_SMOTE(dataset):
     x_res = x_res.reshape(len(x_res), 28, 28)
 
     # Convert back to PyTorch tensors
-    x_res = torch.from_numpy(x_res)
+    x_res = torch.from_numpy(np.array(x_res)).unsqueeze(1)
     y_res = torch.from_numpy(y_res)
 
     # Create a new MNIST dataset with the augmented data
-    dta = torchvision.datasets.MNIST('data/',train=True, download = False)
+    augmented_dataset = AugmentedMNIST(x_res, y_res)
 
-    # Update the data and targets in the augmented dataset
-    dta.data = x_res
-    dta.targets = y_res
+    return augmented_dataset
 
-    return dta
+
+
+
 
 
 
@@ -915,7 +937,7 @@ for trial in range(1):
 
     # treat1 = train_classifier(train,test,configs)
     # treat2 = train_classifier(aug_data,test,configs)
-    treat3 = train_classifier(SMOTE_data,test,configs)
+    treat3 = train_classifier(SMOTE_data,test,configs, smote = True)
     # treat4 = train_classifier(Synth_data,test,configs)
     # treat5 = train_classifier(bal_dta,test,configs)
     end_time = time.time()
