@@ -18,13 +18,17 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
 import torchvision
 from torchvision import models, transforms
 from torchvision.datasets import MNIST
+from torchvision.transforms.functional import to_pil_image
 from torchvision.utils import save_image, make_grid
 from tqdm import tqdm
 from tqdm.notebook import tqdm
 from imblearn.over_sampling import SMOTE
+import PIL
+from PIL import Image
 
 #import torch.utils.tensorboard
 #from torch.utils.tensorboard import SummaryWriter
@@ -37,11 +41,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 50, 
-'batch_size_train' : 256, 
+'n_epochs' : 30, 
+'batch_size_train' : 32, 
 'batch_size_test' : 1000, 
-'learning_rate' : 0.001, 
-'momentum' : 0.9, 
+'learning_rate' : 0.01, 
+'momentum' : 0.4, 
 'log_interval' : 10,
 'class_labels' : np.array([2,7]),
 'w' : .7,
@@ -50,13 +54,13 @@ configs = {
 
 configs_DDPM = {
     'n_epoch' : 50,
-    "batch_size" : 64, 
+    "batch_size" : 1024, 
     'n_T' : 100, 
     'device' : "cuda:0",
     'n_classes' : 10, 
     'n_feat' : 256, 
-    'lrate' : 1e-3,
-    'w' : .1
+    'lrate' : 1e-2,
+    'w' : .7
 }
 
 # Load datasets from torchvision datasets
@@ -141,7 +145,7 @@ test=torchvision.datasets.MNIST('data/', train=False, download=True,
 #     return train, test
 
 class PrepareData:
-    def __init__(self, train_set, test_set):
+    def __init__(self, train_set, test_set, prop_keep):
         """
         Arguments:
             train_set (torch dataset object)
@@ -149,23 +153,40 @@ class PrepareData:
         Subsets data to select only desired classes, then imbalances training set, then refactors labels.
         Returns 4 float tensors
         """
-        self.train_data, self.train_targets = self.prepare_dataset(train_set)
-        self.test_data, self.test_targets = self.prepare_dataset(test_set)
+        self.train_data, self.train_targets = self.prepare_imbalanced_dataset(train_set, prop_keep)
+        self.test_data, self.test_targets = self.prepare_test_dataset(test_set)
 
-    def prepare_dataset(self, dataset):
+    def prepare_test_dataset(self, dataset):
         data, targets = dataset.data, dataset.targets
         data, targets = self.subset_data(data, targets)
         targets = self.refactor_labels(targets)
         return data.float(), targets.float()
+
+    def prepare_imbalanced_dataset(self, dataset, prop_keep):
+        data, targets = dataset.data, dataset.targets
+        data, targets = self.subset_data(data, targets)
+        data, targets = self.imbalance_data(data, targets, prop_keep)
+        targets = self.refactor_labels(targets)
+        return data.float(), targets.float()
+
     def subset_data(self, data, targets):
         selection = torch.logical_or(targets == 2, targets == 7)
         data = data[selection]
         targets = targets[selection]
         return data, targets
+
+    def imbalance_data(self, data, targets, prop_keep):
+        sample_probs = {'2': (1 - prop_keep), '7': 0}
+        idx_to_del = [i for i, label in enumerate(targets) if random.random() > sample_probs[str(label.item())]]
+        data = data[idx_to_del]
+        targets = targets[idx_to_del].type(torch.float)
+        return data, targets
+
     def refactor_labels(self, targets):
         targets[targets == 2.] = 0
         targets[targets == 7.] = 1
         return targets
+
 
 # Define simple CNN to classify dataset examples
 class Net(nn.Module):
@@ -187,10 +208,10 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
         
 
-def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):
-    cm = confusion_mtxes[np.argmax(test_accs)] # select the best run (highest test accuracy); cm is the array of raw counts for confusion matrix
+def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5), save_path=None):
+    cm = confusion_mtxes[np.argmax(test_accs)]
     cm_sum = np.sum(cm, axis=1, keepdims=True)
-    cm_perc = cm / cm_sum * 100 # cm_perc is the values for the confusion matrix
+    cm_perc = cm / cm_sum * 100
     annot = np.empty_like(cm).astype(str)
     nrows, ncols = cm.shape
     for i in range(nrows):
@@ -222,6 +243,10 @@ def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):
 
     plt.subplot(1, 3, 3)
     sns.heatmap(cm_df, annot=annot, fmt='', cmap="Blues")
+
+    if save_path:
+        plt.savefig(save_path, dpi=300)
+
     plt.show()
     return fig
 
@@ -492,11 +517,15 @@ class DDPM(nn.Module):
         x_i_store = np.array(x_i_store)
         return x_i, x_i_store
     
-def train_classifier(train, test, configs):
+def train_classifier(train, test, configs, smote=False):
     torch.backends.cudnn.enabled = False
 
     # Define train loader and test loader
-    train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True)
+    #print(type(train))
+    if smote:
+        train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True) #, collate_fn=custom_collate)
+    else:
+        train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True)
     test_loader = torch.utils.data.DataLoader(test, batch_size=configs['batch_size_test'], shuffle=True)
 
     # Define loss function
@@ -510,29 +539,32 @@ def train_classifier(train, test, configs):
     auroc_metric = torchmetrics.classification.BinaryAUROC(thresholds=None)
     test_accs, confusion_mtxes = [], []
     for epoch in range(1, configs['n_epochs']):
+        print(epoch)
         model.train()
         logging.info(f"Starting epoch {epoch}:")
-        pbar = tqdm(train_loader, position=0, leave=True)
-        for batch_idx, (data, target) in enumerate(pbar):
-            data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
+        #pbar = tqdm(train_loader, position=0, leave=True)
+        for batch_idx, (data, target) in enumerate(train_loader):
+            data, target = data.to(torch.float).to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
+            if smote:
+                data = data.unsqueeze(1)
             optimizer.zero_grad()
             output = model(data)
             loss = loss_fn(output, target)
             loss.backward()
             optimizer.step()
-            pbar.set_postfix(CE=loss.item())
+            #pbar.set_postfix(CE=loss.item())
 
         model.eval()
         correct = 0 # count correct predictions
         train_loss.append(loss.item())
-        print(train_loss)
+        #print(loss.item())
         #writer.add_scalar('Training loss',
         #                        loss.item(),
         #                        epoch)
         targets, preds = [], []
         with torch.no_grad():
             for data, target in test_loader:
-                data, target = data, target # since I'm using CPU, I do not push these tensors to device 
+                data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
                 output = model(data)
                 _, pred = torch.max(output,dim=1)
                 correct += pred.eq(target.view_as(pred)).sum().item()
@@ -541,21 +573,23 @@ def train_classifier(train, test, configs):
                 preds += list(pred.cpu().numpy())
 
         test_acc = 100. * correct / len(test_loader.dataset)
+        print(test_acc)
         #writer.add_scalar('Test Accuracy', test_acc, epoch)
         confusion_mtx = sm.confusion_matrix(targets, preds)
         confusion_mtxes.append(confusion_mtx)
         test_accs.append(test_acc)
         auroc = auroc_metric(torch.Tensor(preds), torch.Tensor(targets))
         auroc_list.append(auroc)
-        print(epoch)
-    print(f'\rBest test acc {max(test_accs)}', end='', flush=True)
+        #print(epoch)
+    print(f'\rBest test acc {max(test_accs)}', end='\n', flush=True)
     print(confusion_mtxes[-1])
+    vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'])
 
 
     # Calculate AUROC, f1, precision, recall
     f1, recall, precision, auroc = f1_score(targets, preds, average='macro'), sm.recall_score(targets, preds), sm.precision_score(targets, preds), sm.roc_auc_score(targets, preds)
 
-    print(f'f1 score: {f1} \n recall: {recall} \n precision: {precision} \n Area under receiving operating characteristic: {auroc}')
+    print(f'\nf1 score: {f1} \n recall: {recall} \n precision: {precision} \n Area under receiving operating characteristic: {auroc}')
 
     #writer.add_figure('matplotlib', vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], figsize=(15, 5)))
 
@@ -582,7 +616,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
   n= len(train_data.data)
   n_gen = math.ceil((1 - prop_keep) * n)
-  print(n, n_gen)
+  #print(n, n_gen)
 
   print("training generator")
   ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
@@ -593,7 +627,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
   for ep in range(n_epoch):
       print(f'epoch {ep}')
-      ddpm.train()
+      ddpm.train().to(device)
 
       # linear lrate decay
       optim.param_groups[0]['lr'] = lrate*(1-ep/n_epoch)
@@ -612,6 +646,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
               loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
           #pbar.set_description(f"loss: {loss_ema:.4f}")
           optim.step()
+      print(float(loss))
 
   torch.save(ddpm.state_dict(), f"model_{ep}.pth")
   torch.cuda.empty_cache()
@@ -631,7 +666,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen = x_gen.to("cpu")
 
-        print(x_gen.data.shape, train_data.data.shape)
+        #print(x_gen.data.shape, train_data.data.shape)
         # Concatenate generated images with existing data
         #train_data.data = train_data.data.to(device)
         train_data.data = torch.vstack([train_data.data, x_gen.squeeze(1)])
@@ -767,91 +802,195 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
 
   return train_data
 
+
+
+# def Aug_SMOTE(train):
+#     smote = SMOTE()
+
+#     X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets)  # Smote the dataset (must flatten to 2d first)
+
+#     X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
+#     transform = transforms.ToTensor()
+
+#     X_tensor = torch.stack([transform(x) for x in X])  # Convert X to a NumPy array
+#     y_tensor = torch.from_numpy(y).type(torch.LongTensor)  # Convert y to a NumPy array
+
+#     augmented_dataset = AugmentedMNIST(train)
+#     augmented_dataset.data = X_tensor
+#     augmented_dataset.targets = y_tensor
+
+#     return augmented_dataset
+
+
+def custom_collate(batch):
+    if isinstance(batch[0][0], PIL.Image.Image):
+        # Convert PIL Images to tensors
+        batch = [(torch.tensor(np.array(image)), target) for image, target in batch]
+    return torch.utils.data.dataloader.default_collate(batch)
+
+# class AugmentedMNIST(Dataset):
+#     def __init__(self, data, targets):
+#         self.data = data
+#         self.targets = targets
+
+#     def __len__(self):
+#         return len(self.targets)
+
+#     def __getitem__(self, index):
+#         image = self.data[index]
+#         target = self.targets[index]
+#         if image.ndim > 2:
+#             image = np.mean(image.numpy(), axis=0)
+#         else:
+#             image = image.squeeze().numpy()
+#         image = Image.fromarray(image.astype(np.uint8), mode='L')
+#         return image, torch.tensor(target, dtype=torch.long).clone().detach()
+
 def Aug_SMOTE(train):
-    """
-    require torch.dataset object
-    """
-    dta = torchvision.datasets.MNIST('data/', download = False)
     smote = SMOTE()
     X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets) # smote the dataset (must flatten to 2d first)
 
     X = np.reshape(X, (len(X), 28, 28)) # reshape X to 3d
 
-    X_tensor = torch.from_numpy(X).view(len(X), 28, 28).float().requires_grad_(True) #.to(device) # push X to GPU and reshape
-    y_tensor = torch.from_numpy(y).type(torch.LongTensor) #.to(device)
-    dta.data = X_tensor
-    dta.targets = y_tensor
+    X_tensor = torch.from_numpy(X).view(len(X), 28, 28).float() #.to(device) # push X to GPU and reshape
+    y_tensor = torch.from_numpy(y)  #.to(device)
 
-    return dta
+    train.data = X_tensor
+    train.targets = y_tensor
+
+    return train
+
+def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):
+    cm = confusion_mtxes[np.argmax(test_accs)]
+    cm_sum = np.sum(cm, axis=1, keepdims=True)
+    cm_perc = cm / cm_sum * 100
+    annot = np.empty_like(cm).astype(str)
+    nrows, ncols = cm.shape
+    for i in range(nrows):
+        for j in range(ncols):
+            c = cm[i, j]
+            p = cm_perc[i, j]
+            if c == 0:
+                annot[i, j] = ''
+            else:
+                annot[i, j] = '%.1f%%' % p
+    cm = pd.DataFrame(cm, index=labels, columns=labels)
+    cm.index.name = 'Actual'
+    cm.columns.name = 'Predicted'
+
+    fig = plt.figure(figsize=figsize)
+
+    plt.subplot(1, 3, 1)
+    plt.title('Training Loss')
+    plt.xlabel('Epoch')
+    plt.semilogy(train_loss, 'r')
+    plt.ylabel('Log training loss')
+
+    plt.subplot(1, 3, 2)
+    plt.title('Test Accuracy (%)')
+    plt.xlabel('Epoch')
+    plt.ylabel('% accurate')
+    plt.plot(test_accs, 'g')
+    plt.grid(True)
+
+    plt.subplot(1, 3, 3)
+    sns.heatmap(cm, annot=annot, fmt='', cmap="Blues")
+    plt.show()
+
+
+
+
+
+
 
 #=========================================================================
 
+"""
+##############TUNING###############
 #train, test = unbalance_data(train,test,class0=3,class1=7,prop_keep=.5)
 
 # Modify the data
-data_preparer = PrepareData(train, test)
+data_preparer = PrepareData(train, test, .1)
 train.data = data_preparer.train_data
 train.targets = data_preparer.train_targets
 test.data = data_preparer.test_data
 test.targets = data_preparer.test_targets
 
-print(torch.unique(train.targets, return_counts = True))
+#print(torch.unique(train.targets, return_counts = True))
 
-#end_time = time.time()
-#print("Time Elapsed: ", end_time - start_time)
-#aug_data = Aug(train, 1, configs_DDPM) #treatment2
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
+aug_data = Aug(train, 1, configs_DDPM) #treatment2
 #Synth_data = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
 train_classifier(train,test,configs)
-
-
 """
-dta = torchvision.datasets.MNIST('data/',download = False)
-bal_dta = torchvision.datasets.MNIST('data/',download = False) #make bal_data a torch dataset
+
+
+
+#dta = torchvision.datasets.MNIST('data/',train=True, download = False)
+bal_dta = torchvision.datasets.MNIST('data/',train=True, download = True) #make bal_data a torch dataset
 df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5', 
                             'recall_1', 'recall_2', 'recall_3', 'recall_4', 'recall_5', 
                             'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
                             'auroc_1','auroc_2','auroc_3','auroc_4','auroc_5'])
 for trial in range(1):
-    dta.data, dta.targets = imbalance_data(train, test, .1) #treatment1
+    end_time = time.time()
+    print("Trial no {trial} Time Elapsed: ", end_time - start_time)
 
-    n_samples = len(dta.targets) 
-    bal_dta.data = train.data[0:n_samples] #treatment5
-    bal_dta.targets = train.targets[0:n_samples] 
+    data_preparer = PrepareData(train, test, .1)
+    train.data = data_preparer.train_data
+    train.targets = data_preparer.train_targets
+    test.data = data_preparer.test_data
+    test.targets = data_preparer.test_targets
 
-    aug_data = Aug(dta, .1, configs_DDPM) #treatment2
+    n_samples = len(train.targets)
+    n_dataset = len(bal_dta.targets)
+    idx = random.sample(range(n_dataset), n_samples)
+    bal_dta.data = train.data[idx] #treatment5
+    bal_dta.targets = train.targets[idx] 
 
-    SMOTE_data = Aug_SMOTE(dta) #treatment3
+    aug_data = Aug(train, .1, configs_DDPM) #treatment2
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
-    Synth_data = Full_Synth(dta,n_samples,configs_DDPM) #treatment4
+    # SMOTE_data = Aug_SMOTE(train) #treatment3
+    # end_time = time.time()
+    # print("Time Elapsed: ", end_time - start_time)
+    
+    Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
-    treat1 = train_classifier(imb_data,test,configs)
+    treat1 = train_classifier(train,test,configs)
     treat2 = train_classifier(aug_data,test,configs)
-    treat3 = train_classifier(SMOTE_data,test,configs)
+    #treat3 = train_classifier(SMOTE_data,test,configs, smote = True)
     treat4 = train_classifier(Synth_data,test,configs)
-    treat5 = train_classifier(bal_data,test,configs)
+    treat5 = train_classifier(bal_dta,test,configs)
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
     row_data = {
     'f1_1' : treat1[0], 
     'f1_2' : treat2[0],
-    'f1_3' : treat3[0], 
+    #'f1_3' : treat3[0], 
     'f1_4' : treat4[0], 
     'f1_5' : treat5[0], 
     'recall_1' : treat1[1], 
     'recall_2' : treat2[1], 
-    'recall_3' : treat3[1], 
+    #'recall_3' : treat3[1], 
     'recall_4' : treat4[1], 
     'recall_5' : treat5[1], 
     'precision_1' : treat1[2], 
     'precision_2' : treat2[2], 
-    'precision_3' : treat3[2], 
+    #'precision_3' : treat3[2], 
     'precision_4' : treat4[2], 
     'precision_5' : treat5[2], 
     'auroc_1' : treat1[3],
     'auroc_2': treat2[3],
-    'auroc_3' : treat3[3],
+    #'auroc_3' : treat3[3],
     'auroc_4' : treat4[3],
     'auroc_5' : treat5[3]
     }
@@ -860,7 +999,7 @@ for trial in range(1):
     df.to_csv('Exp_Log.csv', index=False)
 
     torch.cuda.empty_cache()
-"""
+
 
 
 

@@ -16,10 +16,10 @@ pip install copy logging typing random math matplotlib matplotlib.pyplot numplot
 pip install  torch scikit-learn==0.24.2 torchvision==0.9.1 tqdm==4.61.1 torch-utils-data==0.2.0 
 pip install imbalanced-learn==0.8.0 seaborn==0.11.1 
 pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
-pip install "git+https://github.com/tqdm/tqdm.git@devel#egg=tqdm"
+#pip install "git+https://github.com/tqdm/tqdm.git@devel#egg=tqdm"
 pip install --upgrade jupyter
 pip install --upgrade ipywidgets
-pip install  torchmetrics
+pip install  pillow
 #tensorboard --logdir {'/local/scratch/cfikes/FHAI_3/Conditional_MNIST/logs/'}  --host localhost # REPLACE THE STRING IN BRACKETS WITH PATH TO STORE LOGS.
 
 # Change to the project directory
