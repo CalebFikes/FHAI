@@ -793,7 +793,7 @@ def Aug_SMOTE(train):
     """
     dta = torchvision.datasets.MNIST('data/', download = False)
     smote = SMOTE()
-    print(train.data.shape, len(train.targets))
+    #print(train.data.shape, len(train.targets))
     X, y = smote.fit_resample(train.data.reshape(-1, 28*28), train.targets) # smote the dataset (must flatten to 2d first)
 
     X = np.reshape(X, (len(X), 28, 28)) # reshape X to 3d
@@ -803,6 +803,7 @@ def Aug_SMOTE(train):
     dta.data = X_tensor
     dta.targets = y_tensor
 
+    print(type(dta))
     return dta
 
 #=========================================================================
@@ -858,11 +859,12 @@ for trial in range(1):
     SMOTE_data = Aug_SMOTE(train) #treatment3
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
-
+    
     #Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
+    print(type(train))
     # treat1 = train_classifier(train,test,configs)
     # treat2 = train_classifier(aug_data,test,configs)
     treat3 = train_classifier(SMOTE_data,test,configs)
