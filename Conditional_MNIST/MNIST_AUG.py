@@ -932,6 +932,12 @@ train_classifier(train,test,configs)
 
 #dta = torchvision.datasets.MNIST('data/',train=True, download = False)
 bal_dta = torchvision.datasets.MNIST('data/',train=True, download = True) #make bal_data a torch dataset
+data_preparer = PrepareData(bal_dta, test, 1) #subset bal_data but keep full length
+train.data = data_preparer.train_data
+train.targets = data_preparer.train_targets
+test.data = data_preparer.test_data
+test.targets = data_preparer.test_targets
+
 df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5', 
                             'recall_1', 'recall_2', 'recall_3', 'recall_4', 'recall_5', 
                             'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
