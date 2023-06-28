@@ -905,55 +905,55 @@ for trial in range(1):
     test.data = data_preparer.test_data
     test.targets = data_preparer.test_targets
 
-    n_samples = len(train.targets) 
-    bal_dta.data = train.data[0:n_samples] #treatment5
-    bal_dta.targets = train.targets[0:n_samples] 
+    # n_samples = len(train.targets) 
+    # bal_dta.data = train.data[0:n_samples] #treatment5
+    # bal_dta.targets = train.targets[0:n_samples] 
 
-    aug_data = Aug(train, .1, configs_DDPM) #treatment2
-    end_time = time.time()
-    print("Time Elapsed: ", end_time - start_time)
+    # aug_data = Aug(train, .1, configs_DDPM) #treatment2
+    # end_time = time.time()
+    # print("Time Elapsed: ", end_time - start_time)
 
     SMOTE_data = Aug_SMOTE(train) #treatment3
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
     
-    Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
-    end_time = time.time()
-    print("Time Elapsed: ", end_time - start_time)
+    # Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
+    # end_time = time.time()
+    # print("Time Elapsed: ", end_time - start_time)
 
-    treat1 = train_classifier(train,test,configs)
-    treat2 = train_classifier(aug_data,test,configs)
+    # treat1 = train_classifier(train,test,configs)
+    # treat2 = train_classifier(aug_data,test,configs)
     treat3 = train_classifier(SMOTE_data,test,configs)
-    treat4 = train_classifier(Synth_data,test,configs)
-    treat5 = train_classifier(bal_dta,test,configs)
+    # treat4 = train_classifier(Synth_data,test,configs)
+    # treat5 = train_classifier(bal_dta,test,configs)
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    row_data = {
-    'f1_1' : treat1[0], 
-    'f1_2' : treat2[0],
-    'f1_3' : treat3[0], 
-    'f1_4' : treat4[0], 
-    'f1_5' : treat5[0], 
-    'recall_1' : treat1[1], 
-    'recall_2' : treat2[1], 
-    'recall_3' : treat3[1], 
-    'recall_4' : treat4[1], 
-    'recall_5' : treat5[1], 
-    'precision_1' : treat1[2], 
-    'precision_2' : treat2[2], 
-    'precision_3' : treat3[2], 
-    'precision_4' : treat4[2], 
-    'precision_5' : treat5[2], 
-    'auroc_1' : treat1[3],
-    'auroc_2': treat2[3],
-    'auroc_3' : treat3[3],
-    'auroc_4' : treat4[3],
-    'auroc_5' : treat5[3]
-    }
+    # row_data = {
+    # 'f1_1' : treat1[0], 
+    # 'f1_2' : treat2[0],
+    # 'f1_3' : treat3[0], 
+    # 'f1_4' : treat4[0], 
+    # 'f1_5' : treat5[0], 
+    # 'recall_1' : treat1[1], 
+    # 'recall_2' : treat2[1], 
+    # 'recall_3' : treat3[1], 
+    # 'recall_4' : treat4[1], 
+    # 'recall_5' : treat5[1], 
+    # 'precision_1' : treat1[2], 
+    # 'precision_2' : treat2[2], 
+    # 'precision_3' : treat3[2], 
+    # 'precision_4' : treat4[2], 
+    # 'precision_5' : treat5[2], 
+    # 'auroc_1' : treat1[3],
+    # 'auroc_2': treat2[3],
+    # 'auroc_3' : treat3[3],
+    # 'auroc_4' : treat4[3],
+    # 'auroc_5' : treat5[3]
+    # }
 
-    df = df.append(row_data, ignore_index=True)
-    df.to_csv('Exp_Log.csv', index=False)
+    # df = df.append(row_data, ignore_index=True)
+    # df.to_csv('Exp_Log.csv', index=False)
 
     torch.cuda.empty_cache()
 
