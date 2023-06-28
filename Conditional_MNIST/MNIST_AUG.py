@@ -583,7 +583,8 @@ def train_classifier(train, test, configs, label, smote=False):
         #print(epoch)
     print(f'\rBest test acc {max(test_accs)}', end='\n', flush=True)
     print(confusion_mtxes[-1])
-    vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], save_path="/local/scratch/cfikes/FHAI_3/Conditional_MNIST/{label}")
+    #save_path = f"/local/scratch/cfikes/FHAI_3/Conditional_MNIST/{label}.png"
+    #vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], save_path=save_path)
 
 
     # Calculate AUROC, f1, precision, recall
@@ -863,46 +864,6 @@ def Aug_SMOTE(train):
 
     return train
 
-def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):
-    cm = confusion_mtxes[np.argmax(test_accs)]
-    cm_sum = np.sum(cm, axis=1, keepdims=True)
-    cm_perc = cm / cm_sum * 100
-    annot = np.empty_like(cm).astype(str)
-    nrows, ncols = cm.shape
-    for i in range(nrows):
-        for j in range(ncols):
-            c = cm[i, j]
-            p = cm_perc[i, j]
-            if c == 0:
-                annot[i, j] = ''
-            else:
-                annot[i, j] = '%.1f%%' % p
-    cm = pd.DataFrame(cm, index=labels, columns=labels)
-    cm.index.name = 'Actual'
-    cm.columns.name = 'Predicted'
-
-    fig = plt.figure(figsize=figsize)
-
-    plt.subplot(1, 3, 1)
-    plt.title('Training Loss')
-    plt.xlabel('Epoch')
-    plt.semilogy(train_loss, 'r')
-    plt.ylabel('Log training loss')
-
-    plt.subplot(1, 3, 2)
-    plt.title('Test Accuracy (%)')
-    plt.xlabel('Epoch')
-    plt.ylabel('% accurate')
-    plt.plot(test_accs, 'g')
-    plt.grid(True)
-
-    plt.subplot(1, 3, 3)
-    sns.heatmap(cm, annot=annot, fmt='', cmap="Blues")
-    plt.show()
-
-
-
-
 
 
 
@@ -953,57 +914,57 @@ for trial in range(1):
     test.data = data_preparer.test_data
     test.targets = data_preparer.test_targets
 
-    # n_samples = len(train.targets)
-    # n_dataset = len(bal_dta.targets)
-    # idx = random.sample(range(n_dataset), n_samples)
-    # bal_dta.data = bal_dta.data[idx] #treatment5
-    # bal_dta.targets = bal_dta.targets[idx] 
+    n_samples = len(train.targets)
+    n_dataset = len(bal_dta.targets)
+    idx = random.sample(range(n_dataset), n_samples)
+    bal_dta.data = bal_dta.data[idx] #treatment5
+    bal_dta.targets = bal_dta.targets[idx] 
 
-    # aug_data = Aug(train, .1, configs_DDPM) #treatment2
+    aug_data = Aug(train, .1, configs_DDPM) #treatment2
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
+
+    # SMOTE_data = Aug_SMOTE(train) #treatment3
     # end_time = time.time()
     # print("Time Elapsed: ", end_time - start_time)
-
-    # # SMOTE_data = Aug_SMOTE(train) #treatment3
-    # # end_time = time.time()
-    # # print("Time Elapsed: ", end_time - start_time)
     
-    # Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
-    # end_time = time.time()
-    # print("Time Elapsed: ", end_time - start_time)
+    Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
     treat1 = train_classifier(train,test,configs, label = "unbalanced")
-    # treat2 = train_classifier(aug_data,test,configs, label = "augmented")
-    # #treat3 = train_classifier(SMOTE_data,test,configs, smote = True, "label" = "SMOTE")
-    # treat4 = train_classifier(Synth_data,test,configs, label = "synth")
-    # treat5 = train_classifier(bal_dta,test,configs, label = "balanced")
-    # end_time = time.time()
-    # print("Time Elapsed: ", end_time - start_time)
+    treat2 = train_classifier(aug_data,test,configs, label = "augmented")
+    #treat3 = train_classifier(SMOTE_data,test,configs, smote = True, "label" = "SMOTE")
+    treat4 = train_classifier(Synth_data,test,configs, label = "synth")
+    treat5 = train_classifier(bal_dta,test,configs, label = "balanced")
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
-    # row_data = {
-    # 'f1_1' : treat1[0], 
-    # 'f1_2' : treat2[0],
-    # #'f1_3' : treat3[0], 
-    # 'f1_4' : treat4[0], 
-    # 'f1_5' : treat5[0], 
-    # 'recall_1' : treat1[1], 
-    # 'recall_2' : treat2[1], 
-    # #'recall_3' : treat3[1], 
-    # 'recall_4' : treat4[1], 
-    # 'recall_5' : treat5[1], 
-    # 'precision_1' : treat1[2], 
-    # 'precision_2' : treat2[2], 
-    # #'precision_3' : treat3[2], 
-    # 'precision_4' : treat4[2], 
-    # 'precision_5' : treat5[2], 
-    # 'auroc_1' : treat1[3],
-    # 'auroc_2': treat2[3],
-    # #'auroc_3' : treat3[3],
-    # 'auroc_4' : treat4[3],
-    # 'auroc_5' : treat5[3]
-    # }
+    row_data = {
+    'f1_1' : treat1[0], 
+    'f1_2' : treat2[0],
+    #'f1_3' : treat3[0], 
+    'f1_4' : treat4[0], 
+    'f1_5' : treat5[0], 
+    'recall_1' : treat1[1], 
+    'recall_2' : treat2[1], 
+    #'recall_3' : treat3[1], 
+    'recall_4' : treat4[1], 
+    'recall_5' : treat5[1], 
+    'precision_1' : treat1[2], 
+    'precision_2' : treat2[2], 
+    #'precision_3' : treat3[2], 
+    'precision_4' : treat4[2], 
+    'precision_5' : treat5[2], 
+    'auroc_1' : treat1[3],
+    'auroc_2': treat2[3],
+    #'auroc_3' : treat3[3],
+    'auroc_4' : treat4[3],
+    'auroc_5' : treat5[3]
+    }
 
-    # df = df.append(row_data, ignore_index=True)
-    # df.to_csv('Exp_Log.csv', index=False)
+    df = df.append(row_data, ignore_index=True)
+    df.to_csv('Exp_Log.csv', index=False)
 
     torch.cuda.empty_cache()
 
