@@ -540,7 +540,7 @@ def train_classifier(train, test, configs):
             loss = loss_fn(output, target)
             loss.backward()
             optimizer.step()
-            pbar.set_postfix(CE=loss.item())
+            #pbar.set_postfix(CE=loss.item())
 
         model.eval()
         correct = 0 # count correct predictions
