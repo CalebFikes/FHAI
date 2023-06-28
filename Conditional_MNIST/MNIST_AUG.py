@@ -755,7 +755,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
     train_data.data.to(device)
     for i in range(num_batches):
         start_idx = i * batch_size
-        end_idx = (i + 1) * batch_size - 1
+        end_idx = (i + 1) * batch_size #- 1
 
         # Generate images
         x_gen0, x_gen_store0 = ddpm.sample(int(batch_size/2), (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
