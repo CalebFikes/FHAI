@@ -846,27 +846,27 @@ for trial in range(1):
     test.data = data_preparer.test_data
     test.targets = data_preparer.test_targets
 
-    n_samples = len(dta.targets) 
+    n_samples = len(train.targets) 
     bal_dta.data = train.data[0:n_samples] #treatment5
     bal_dta.targets = train.targets[0:n_samples] 
 
-    aug_data = Aug(dta, .1, configs_DDPM) #treatment2
+    aug_data = Aug(train, .1, configs_DDPM) #treatment2
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    SMOTE_data = Aug_SMOTE(dta) #treatment3
+    SMOTE_data = Aug_SMOTE(train) #treatment3
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    Synth_data = Full_Synth(dta,n_samples,configs_DDPM) #treatment4
+    Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    treat1 = train_classifier(imb_data,test,configs)
+    treat1 = train_classifier(train,test,configs)
     treat2 = train_classifier(aug_data,test,configs)
     treat3 = train_classifier(SMOTE_data,test,configs)
     treat4 = train_classifier(Synth_data,test,configs)
-    treat5 = train_classifier(bal_data,test,configs)
+    treat5 = train_classifier(bal_dta,test,configs)
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
