@@ -21,6 +21,7 @@ from torch.utils.data import DataLoader
 import torchvision
 from torchvision import models, transforms
 from torchvision.datasets import MNIST
+from torchvision.transforms.functional import to_pil_image
 from torchvision.utils import save_image, make_grid
 from tqdm import tqdm
 from tqdm.notebook import tqdm
@@ -791,20 +792,22 @@ def Aug_SMOTE(train):
     """
     require torch.dataset object
     """
-    dta = torchvision.datasets.MNIST('data/', download = False)
+    dta = torchvision.datasets.MNIST('data/', download=False)
     smote = SMOTE()
-    #print(train.data.shape, len(train.targets))
-    X, y = smote.fit_resample(train.data.reshape(-1, 28*28), train.targets) # smote the dataset (must flatten to 2d first)
 
-    X = np.reshape(X, (len(X), 28, 28)) # reshape X to 3d
+    X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets)  # Smote the dataset (must flatten to 2d first)
 
-    X_tensor = torch.from_numpy(X).view(len(X), 28, 28).float().requires_grad_(True) #.to(device) # push X to GPU and reshape
-    y_tensor = torch.from_numpy(y).type(torch.LongTensor) #.to(device)
+    X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
+
+    X_tensor = torch.from_numpy(X).float().requires_grad_(True)  # Convert X to a tensor
+    y_tensor = torch.from_numpy(y).type(torch.LongTensor)  # Convert y to a tensor
+
     dta.data = X_tensor
     dta.targets = y_tensor
 
     print(type(dta))
     return dta
+
 
 #=========================================================================
 
