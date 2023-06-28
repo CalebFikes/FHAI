@@ -41,7 +41,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 10, 
+'n_epochs' : 30, 
 'batch_size_train' : 32, 
 'batch_size_test' : 1000, 
 'learning_rate' : 0.01, 
@@ -53,7 +53,7 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 40,
+    'n_epoch' : 50,
     "batch_size" : 1024, 
     'n_T' : 100, 
     'device' : "cuda:0",
@@ -519,7 +519,7 @@ def train_classifier(train, test, configs, smote=False):
     # Define train loader and test loader
     #print(type(train))
     if smote:
-        train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True, collate_fn=custom_collate)
+        train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True) #, collate_fn=custom_collate)
     else:
         train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True)
     test_loader = torch.utils.data.DataLoader(test, batch_size=configs['batch_size_test'], shuffle=True)
@@ -823,49 +823,37 @@ def custom_collate(batch):
         batch = [(torch.tensor(np.array(image)), target) for image, target in batch]
     return torch.utils.data.dataloader.default_collate(batch)
 
-class AugmentedMNIST(Dataset):
-    def __init__(self, data, targets):
-        self.data = data
-        self.targets = targets
+# class AugmentedMNIST(Dataset):
+#     def __init__(self, data, targets):
+#         self.data = data
+#         self.targets = targets
 
-    def __len__(self):
-        return len(self.targets)
+#     def __len__(self):
+#         return len(self.targets)
 
-    def __getitem__(self, index):
-        image = self.data[index]
-        target = self.targets[index]
-        if image.ndim > 2:
-            image = np.mean(image.numpy(), axis=0)
-        else:
-            image = image.squeeze().numpy()
-        image = Image.fromarray(image.astype(np.uint8), mode='L')
-        return image, torch.tensor(target, dtype=torch.long).clone().detach()
+#     def __getitem__(self, index):
+#         image = self.data[index]
+#         target = self.targets[index]
+#         if image.ndim > 2:
+#             image = np.mean(image.numpy(), axis=0)
+#         else:
+#             image = image.squeeze().numpy()
+#         image = Image.fromarray(image.astype(np.uint8), mode='L')
+#         return image, torch.tensor(target, dtype=torch.long).clone().detach()
 
-def Aug_SMOTE(dataset):
-    # Convert MNIST dataset to NumPy arrays
-    x = np.array(dataset.data)
-    y = np.array(dataset.targets)
-
-    # Flatten the images
-    x = x.reshape(len(x), -1)
-
-    # Create SMOTE object
+def Aug_SMOTE(train):
     smote = SMOTE()
+    X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets) # smote the dataset (must flatten to 2d first)
 
-    # Apply SMOTE algorithm
-    x_res, y_res = smote.fit_resample(x, y)
+    X = np.reshape(X, (len(X), 28, 28)) # reshape X to 3d
 
-    # Reshape the images back to their original shape
-    x_res = x_res.reshape(len(x_res), 28, 28)
+    X_tensor = torch.from_numpy(X).view(len(X), 28, 28).float() #.to(device) # push X to GPU and reshape
+    y_tensor = torch.from_numpy(y)  #.to(device)
 
-    # Convert back to PyTorch tensors
-    x_res = torch.from_numpy(np.array(x_res)).unsqueeze(1)
-    y_res = torch.from_numpy(y_res)
+    train.data = X_tensor
+    train.targets = y_tensor
 
-    # Create a new MNIST dataset with the augmented data
-    augmented_dataset = AugmentedMNIST(x_res, y_res)
-
-    return augmented_dataset
+    return train
 
 
 
@@ -917,59 +905,59 @@ for trial in range(1):
     test.data = data_preparer.test_data
     test.targets = data_preparer.test_targets
 
-    # n_samples = len(train.targets)
-    # n_dataset = len(bal_dta.targets)
-    # idx = random.sample(range(n_dataset), n_samples)
-    # bal_dta.data = train.data[idx] #treatment5
-    # bal_dta.targets = train.targets[idx] 
+    n_samples = len(train.targets)
+    n_dataset = len(bal_dta.targets)
+    idx = random.sample(range(n_dataset), n_samples)
+    bal_dta.data = train.data[idx] #treatment5
+    bal_dta.targets = train.targets[idx] 
 
-    # aug_data = Aug(train, .1, configs_DDPM) #treatment2
-    # end_time = time.time()
-    # print("Time Elapsed: ", end_time - start_time)
-
-    SMOTE_data = Aug_SMOTE(train) #treatment3
+    aug_data = Aug(train, .1, configs_DDPM) #treatment2
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
+
+    # SMOTE_data = Aug_SMOTE(train) #treatment3
+    # end_time = time.time()
+    # print("Time Elapsed: ", end_time - start_time)
     
-    # Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
-    # end_time = time.time()
-    # print("Time Elapsed: ", end_time - start_time)
-
-    # treat1 = train_classifier(train,test,configs)
-    # treat2 = train_classifier(aug_data,test,configs)
-    treat3 = train_classifier(SMOTE_data,test,configs, smote = True)
-    # treat4 = train_classifier(Synth_data,test,configs)
-    # treat5 = train_classifier(bal_dta,test,configs)
+    Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    # row_data = {
-    # 'f1_1' : treat1[0], 
-    # 'f1_2' : treat2[0],
-    # 'f1_3' : treat3[0], 
-    # 'f1_4' : treat4[0], 
-    # 'f1_5' : treat5[0], 
-    # 'recall_1' : treat1[1], 
-    # 'recall_2' : treat2[1], 
-    # 'recall_3' : treat3[1], 
-    # 'recall_4' : treat4[1], 
-    # 'recall_5' : treat5[1], 
-    # 'precision_1' : treat1[2], 
-    # 'precision_2' : treat2[2], 
-    # 'precision_3' : treat3[2], 
-    # 'precision_4' : treat4[2], 
-    # 'precision_5' : treat5[2], 
-    # 'auroc_1' : treat1[3],
-    # 'auroc_2': treat2[3],
-    # 'auroc_3' : treat3[3],
-    # 'auroc_4' : treat4[3],
-    # 'auroc_5' : treat5[3]
-    # }
+    treat1 = train_classifier(train,test,configs)
+    treat2 = train_classifier(aug_data,test,configs)
+    #treat3 = train_classifier(SMOTE_data,test,configs, smote = True)
+    treat4 = train_classifier(Synth_data,test,configs)
+    treat5 = train_classifier(bal_dta,test,configs)
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
-    # df = df.append(row_data, ignore_index=True)
-    # df.to_csv('Exp_Log.csv', index=False)
+    row_data = {
+    'f1_1' : treat1[0], 
+    'f1_2' : treat2[0],
+    #'f1_3' : treat3[0], 
+    'f1_4' : treat4[0], 
+    'f1_5' : treat5[0], 
+    'recall_1' : treat1[1], 
+    'recall_2' : treat2[1], 
+    #'recall_3' : treat3[1], 
+    'recall_4' : treat4[1], 
+    'recall_5' : treat5[1], 
+    'precision_1' : treat1[2], 
+    'precision_2' : treat2[2], 
+    #'precision_3' : treat3[2], 
+    'precision_4' : treat4[2], 
+    'precision_5' : treat5[2], 
+    'auroc_1' : treat1[3],
+    'auroc_2': treat2[3],
+    #'auroc_3' : treat3[3],
+    'auroc_4' : treat4[3],
+    'auroc_5' : treat5[3]
+    }
 
-    # torch.cuda.empty_cache()
+    df = df.append(row_data, ignore_index=True)
+    df.to_csv('Exp_Log.csv', index=False)
+
+    torch.cuda.empty_cache()
 
 
 
