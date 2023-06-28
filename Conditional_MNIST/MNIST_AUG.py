@@ -49,7 +49,7 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 50,
+    'n_epoch' : 10,
     "batch_size" : 512, 
     'n_T' : 100, 
     'device' : "cuda:0",
@@ -527,6 +527,7 @@ def train_classifier(train, test, configs):
     auroc_metric = torchmetrics.classification.BinaryAUROC(thresholds=None)
     test_accs, confusion_mtxes = [], []
     for epoch in range(1, configs['n_epochs']):
+        print(epoch)
         model.train()
         logging.info(f"Starting epoch {epoch}:")
         pbar = tqdm(train_loader, position=0, leave=True)
@@ -565,15 +566,15 @@ def train_classifier(train, test, configs):
         test_accs.append(test_acc)
         auroc = auroc_metric(torch.Tensor(preds), torch.Tensor(targets))
         auroc_list.append(auroc)
-        print(epoch)
-    print(f'\rBest test acc {max(test_accs)}', end='', flush=True)
+        #print(epoch)
+    print(f'\rBest test acc {max(test_accs)}', end='\n', flush=True)
     print(confusion_mtxes[-1])
 
 
     # Calculate AUROC, f1, precision, recall
     f1, recall, precision, auroc = f1_score(targets, preds, average='macro'), sm.recall_score(targets, preds), sm.precision_score(targets, preds), sm.roc_auc_score(targets, preds)
 
-    print(f'f1 score: {f1} \n recall: {recall} \n precision: {precision} \n Area under receiving operating characteristic: {auroc}')
+    print(f'\nf1 score: {f1} \n recall: {recall} \n precision: {precision} \n Area under receiving operating characteristic: {auroc}')
 
     #writer.add_figure('matplotlib', vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], figsize=(15, 5)))
 
@@ -600,7 +601,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
 
   n= len(train_data.data)
   n_gen = math.ceil((1 - prop_keep) * n)
-  print(n, n_gen)
+  #print(n, n_gen)
 
   print("training generator")
   ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
@@ -650,7 +651,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
         x_gen, x_gen_store = ddpm.sample(batch_size, (1, 28, 28), "cuda:0", label=[0], guide_w=0.5)
         x_gen = x_gen.to("cpu")
 
-        print(x_gen.data.shape, train_data.data.shape)
+        #print(x_gen.data.shape, train_data.data.shape)
         # Concatenate generated images with existing data
         #train_data.data = train_data.data.to(device)
         train_data.data = torch.vstack([train_data.data, x_gen.squeeze(1)])
@@ -814,7 +815,7 @@ train.targets = data_preparer.train_targets
 test.data = data_preparer.test_data
 test.targets = data_preparer.test_targets
 
-print(torch.unique(train.targets, return_counts = True))
+#print(torch.unique(train.targets, return_counts = True))
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
@@ -834,6 +835,9 @@ df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5',
                             'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
                             'auroc_1','auroc_2','auroc_3','auroc_4','auroc_5'])
 for trial in range(1):
+    end_time = time.time()
+    print("Trial no {trial} Time Elapsed: ", end_time - start_time)
+
     data_preparer = PrepareData(train, test, .1)
     train.data = data_preparer.train_data
     train.targets = data_preparer.train_targets
@@ -845,16 +849,24 @@ for trial in range(1):
     bal_dta.targets = train.targets[0:n_samples] 
 
     aug_data = Aug(dta, .1, configs_DDPM) #treatment2
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
     SMOTE_data = Aug_SMOTE(dta) #treatment3
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
     Synth_data = Full_Synth(dta,n_samples,configs_DDPM) #treatment4
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
     treat1 = train_classifier(imb_data,test,configs)
     treat2 = train_classifier(aug_data,test,configs)
     treat3 = train_classifier(SMOTE_data,test,configs)
     treat4 = train_classifier(Synth_data,test,configs)
     treat5 = train_classifier(bal_data,test,configs)
+    end_time = time.time()
+    print("Time Elapsed: ", end_time - start_time)
 
     row_data = {
     'f1_1' : treat1[0], 
