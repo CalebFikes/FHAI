@@ -851,7 +851,7 @@ for trial in range(1):
     bal_dta.data = train.data[0:n_samples] #treatment5
     bal_dta.targets = train.targets[0:n_samples] 
 
-    aug_data = Aug(train, .1, configs_DDPM) #treatment2
+    #aug_data = Aug(train, .1, configs_DDPM) #treatment2
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
@@ -859,15 +859,15 @@ for trial in range(1):
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
+    #Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    treat1 = train_classifier(train,test,configs)
-    treat2 = train_classifier(aug_data,test,configs)
+    # treat1 = train_classifier(train,test,configs)
+    # treat2 = train_classifier(aug_data,test,configs)
     treat3 = train_classifier(SMOTE_data,test,configs)
-    treat4 = train_classifier(Synth_data,test,configs)
-    treat5 = train_classifier(bal_dta,test,configs)
+    # treat4 = train_classifier(Synth_data,test,configs)
+    # treat5 = train_classifier(bal_dta,test,configs)
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
