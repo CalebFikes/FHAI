@@ -869,7 +869,7 @@ def Aug_SMOTE(train):
 
 #=========================================================================
 
-"""
+
 ##############TUNING###############
 #train, test = unbalance_data(train,test,class0=3,class1=7,prop_keep=.5)
 
@@ -889,12 +889,13 @@ aug_data = Aug(train, 1, configs_DDPM) #treatment2
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
-train_classifier(train,test,configs)
-"""
+train_classifier(aug_data,test,configs)
+
 
 
 
 #dta = torchvision.datasets.MNIST('data/',train=True, download = False)
+"""
 bal_dta = torchvision.datasets.MNIST('data/',train=True, download = True) #make bal_data a torch dataset
 data_preparer = PrepareData(bal_dta, test, 1) #subset bal_data but keep full length
 bal_dta.data = data_preparer.train_data
@@ -967,6 +968,7 @@ for trial in range(1):
     df.to_csv('Exp_Log.csv', index=False)
 
     torch.cuda.empty_cache()
+"""
 
 
 
