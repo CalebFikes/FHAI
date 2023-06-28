@@ -56,7 +56,7 @@ configs_DDPM = {
     'n_classes' : 10, 
     'n_feat' : 256, 
     'lrate' : 1e-3,
-    'w' : .1
+    'w' : .7
 }
 
 # Load datasets from torchvision datasets
@@ -631,7 +631,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
               loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
           #pbar.set_description(f"loss: {loss_ema:.4f}")
           optim.step()
-      print(loss)
+      print(float(loss))
 
   torch.save(ddpm.state_dict(), f"model_{ep}.pth")
   torch.cuda.empty_cache()
