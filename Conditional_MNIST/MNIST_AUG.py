@@ -549,7 +549,7 @@ def train_classifier(train, test, configs):
         targets, preds = [], []
         with torch.no_grad():
             for data, target in test_loader:
-                data, target = data, target # since I'm using CPU, I do not push these tensors to device 
+                data, target = data.to(device), target.to(device) # since I'm using CPU, I do not push these tensors to device 
                 output = model(data)
                 _, pred = torch.max(output,dim=1)
                 correct += pred.eq(target.view_as(pred)).sum().item()
@@ -630,6 +630,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
               loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
           #pbar.set_description(f"loss: {loss_ema:.4f}")
           optim.step()
+      print(loss)
 
   torch.save(ddpm.state_dict(), f"model_{ep}.pth")
   torch.cuda.empty_cache()
