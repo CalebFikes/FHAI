@@ -799,14 +799,15 @@ def Aug_SMOTE(train):
 
     X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
 
-    X_tensor = torch.from_numpy(X).float().requires_grad_(True)  # Convert X to a tensor
-    y_tensor = torch.from_numpy(y).type(torch.LongTensor)  # Convert y to a tensor
+    X_tensor = torch.from_numpy(X).float().detach().numpy()  # Convert X to a NumPy array
+    y_tensor = torch.from_numpy(y).type(torch.LongTensor).detach().numpy()  # Convert y to a NumPy array
 
     dta.data = X_tensor
     dta.targets = y_tensor
 
     print(type(dta))
     return dta
+
 
 
 #=========================================================================
