@@ -847,7 +847,7 @@ def Aug_SMOTE(dataset):
     dta.data = x_res
     dta.targets = y_res
 
-    return augmented_dataset
+    return dta
 
 
 
