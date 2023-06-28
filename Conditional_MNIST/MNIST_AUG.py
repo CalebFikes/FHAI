@@ -606,13 +606,13 @@ def train_classifier(train, test, configs, smote=False):
     return f1, recall, precision, auroc
 
 def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/diffusion_outputs10/'):
-  n_epoch = configs_DDPM['n_epoch']
-  batch_size = configs_DDPM['batch_size']
-  n_T = configs_DDPM['n_T']
-  n_classes = configs_DDPM['n_classes']
-  n_feat = configs_DDPM['n_feat']
-  lrate = configs_DDPM['lrate']
-  w = configs_DDPM['w']
+  n_epoch = configs['n_epoch']
+  batch_size = configs['batch_size']
+  n_T = configs['n_T']
+  n_classes = configs['n_classes']
+  n_feat = configs['n_feat']
+  lrate = configs['lrate']
+  w = configs['w']
 
   n= len(train_data.data)
   n_gen = math.ceil((1 - prop_keep) * n)
@@ -621,6 +621,7 @@ def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/d
   print("training generator")
   ddpm = DDPM(nn_model=ContextUnet(in_channels=1, n_feat=n_feat, n_classes=n_classes), betas=(1e-4, 0.02), n_T=n_T, device=device, drop_prob=0.1)
 
+  print(batch_size)
   dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
   optim = torch.optim.Adam(ddpm.parameters(), lr=lrate)
