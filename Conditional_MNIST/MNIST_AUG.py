@@ -514,6 +514,7 @@ def train_classifier(train, test, configs):
     torch.backends.cudnn.enabled = False
 
     # Define train loader and test loader
+    print(type(train))
     train_loader = torch.utils.data.DataLoader(train, batch_size=configs['batch_size_train'], shuffle=True)
     test_loader = torch.utils.data.DataLoader(test, batch_size=configs['batch_size_test'], shuffle=True)
 
@@ -870,7 +871,7 @@ for trial in range(1):
     print("Time Elapsed: ", end_time - start_time)
 
     print(type(train))
-    # treat1 = train_classifier(train,test,configs)
+    treat1 = train_classifier(train,test,configs)
     # treat2 = train_classifier(aug_data,test,configs)
     treat3 = train_classifier(SMOTE_data,test,configs)
     # treat4 = train_classifier(Synth_data,test,configs)
