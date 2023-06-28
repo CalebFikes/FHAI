@@ -765,7 +765,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
 
         # Concatenate generated images
         batch_data = torch.vstack([x_gen0, x_gen1])
-        batch_targets = torch.hstack([torch.zeros(batch_size/2), torch.ones(batch_size/2)])
+        batch_targets = torch.hstack([torch.zeros(int(batch_size/2)), torch.ones(int(batch_size/2))])
 
         # Update train_data with batch data
         train_data.data[start_idx:end_idx] = batch_data
@@ -790,7 +790,7 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
 
         # Concatenate generated images
         batch_data = torch.vstack([x_gen0, x_gen1]) 
-        batch_targets = torch.hstack([torch.zeros(remaining_samples/2), torch.ones(remaining_samples)])
+        batch_targets = torch.hstack([torch.zeros(int(remaining_samples/2)), torch.ones(int(remaining_samples/2))])
 
         # Update train_data with remaining batch data
         train_data.data[start_idx:end_idx] = batch_data
