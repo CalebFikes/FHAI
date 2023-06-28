@@ -49,8 +49,8 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 10,
-    "batch_size" : 512, 
+    'n_epoch' : 20,
+    "batch_size" : 1024, 
     'n_T' : 100, 
     'device' : "cuda:0",
     'n_classes' : 10, 
