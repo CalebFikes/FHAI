@@ -789,26 +789,36 @@ def Full_Synth(train_data, length, configs, save_model = False, save_dir = './da
 
   return train_data
 
+class AugmentedMNIST(torch.utils.data.Dataset):
+    def __init__(self, mnist_dataset):
+        self.data = mnist_dataset.data
+        self.targets = mnist_dataset.targets
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, index):
+        image = self.data[index]
+        target = self.targets[index]
+        return image, target
+
 def Aug_SMOTE(train):
-    """
-    require torch.dataset object
-    """
-    dta = torchvision.datasets.MNIST('data/', download=False)
-    print(type(dta.data), type(dta.targets))
     smote = SMOTE()
 
     X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets)  # Smote the dataset (must flatten to 2d first)
 
     X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
+    transform = transforms.ToTensor()
 
-    X_tensor = torch.from_numpy(X).float().requires_grad_(True)  # Convert X to a NumPy array
+    X_tensor = torch.stack([transform(x) for x in X])  # Convert X to a NumPy array
     y_tensor = torch.from_numpy(y).type(torch.LongTensor)  # Convert y to a NumPy array
 
-    dta.data = X_tensor
-    dta.targets = y_tensor
-    print(type(dta.data), type(dta.targets))
-    print(type(dta))
-    return dta
+    augmented_dataset = AugmentedMNIST(train)
+    augmented_dataset.data = X_tensor
+    augmented_dataset.targets = y_tensor
+
+    return augmented_dataset
+
 
 
 
@@ -859,7 +869,7 @@ for trial in range(1):
     bal_dta.data = train.data[0:n_samples] #treatment5
     bal_dta.targets = train.targets[0:n_samples] 
 
-    #aug_data = Aug(train, .1, configs_DDPM) #treatment2
+    aug_data = Aug(train, .1, configs_DDPM) #treatment2
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
@@ -867,16 +877,15 @@ for trial in range(1):
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
     
-    #Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
+    Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    print(type(train))
     treat1 = train_classifier(train,test,configs)
-    # treat2 = train_classifier(aug_data,test,configs)
+    treat2 = train_classifier(aug_data,test,configs)
     treat3 = train_classifier(SMOTE_data,test,configs)
-    # treat4 = train_classifier(Synth_data,test,configs)
-    # treat5 = train_classifier(bal_dta,test,configs)
+    treat4 = train_classifier(Synth_data,test,configs)
+    treat5 = train_classifier(bal_dta,test,configs)
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
