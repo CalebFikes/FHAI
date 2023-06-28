@@ -802,23 +802,63 @@ class AugmentedMNIST(torch.utils.data.Dataset):
         target = self.targets[index]
         return image, target
 
-def Aug_SMOTE(train):
+# def Aug_SMOTE(train):
+#     smote = SMOTE()
+
+#     X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets)  # Smote the dataset (must flatten to 2d first)
+
+#     X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
+#     transform = transforms.ToTensor()
+
+#     X_tensor = torch.stack([transform(x) for x in X])  # Convert X to a NumPy array
+#     y_tensor = torch.from_numpy(y).type(torch.LongTensor)  # Convert y to a NumPy array
+
+#     augmented_dataset = AugmentedMNIST(train)
+#     augmented_dataset.data = X_tensor
+#     augmented_dataset.targets = y_tensor
+
+#     return augmented_dataset
+
+import torch
+import numpy as np
+from torchvision.datasets import mnist
+from imblearn.over_sampling import SMOTE
+
+def Aug_SMOTE(dataset):
+    # Convert MNIST dataset to NumPy arrays
+    x = np.array(dataset.data)
+    y = np.array(dataset.targets)
+
+    # Flatten the images
+    x = x.reshape(len(x), -1)
+
+    # Create SMOTE object
     smote = SMOTE()
 
-    X, y = smote.fit_resample(train.data.view(len(train), -1), train.targets)  # Smote the dataset (must flatten to 2d first)
+    # Apply SMOTE algorithm
+    x_res, y_res = smote.fit_resample(x, y)
 
-    X = X.reshape(len(X), 28, 28)  # Reshape X to 3d
-    transform = transforms.ToTensor()
+    # Reshape the images back to their original shape
+    x_res = x_res.reshape(len(x_res), 28, 28)
 
-    X_tensor = torch.stack([transform(x) for x in X])  # Convert X to a NumPy array
-    y_tensor = torch.from_numpy(y).type(torch.LongTensor)  # Convert y to a NumPy array
+    # Convert back to PyTorch tensors
+    x_res = torch.from_numpy(x_res)
+    y_res = torch.from_numpy(y_res)
 
-    augmented_dataset = AugmentedMNIST(train)
-    augmented_dataset.data = X_tensor
-    augmented_dataset.targets = y_tensor
+    # Create a new MNIST dataset with the augmented data
+    augmented_dataset = mnist.MNIST(
+        root=dataset.root,
+        train=dataset.train,
+        transform=dataset.transform,
+        target_transform=dataset.target_transform,
+        download=dataset.download
+    )
+
+    # Update the data and targets in the augmented dataset
+    augmented_dataset.data = x_res
+    augmented_dataset.targets = y_res
 
     return augmented_dataset
-
 
 
 
