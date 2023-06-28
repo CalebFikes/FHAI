@@ -517,7 +517,7 @@ class DDPM(nn.Module):
         x_i_store = np.array(x_i_store)
         return x_i, x_i_store
     
-def train_classifier(train, test, configs, smote=False):
+def train_classifier(train, test, configs, label, smote=False):
     torch.backends.cudnn.enabled = False
 
     # Define train loader and test loader
@@ -583,7 +583,7 @@ def train_classifier(train, test, configs, smote=False):
         #print(epoch)
     print(f'\rBest test acc {max(test_accs)}', end='\n', flush=True)
     print(confusion_mtxes[-1])
-    vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], save_path="/local/scratch/cfikes/FHAI_3/Conditional_MNIST")
+    vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], save_path="/local/scratch/cfikes/FHAI_3/Conditional_MNIST/{label}")
 
 
     # Calculate AUROC, f1, precision, recall
@@ -938,10 +938,10 @@ data_preparer = PrepareData(bal_dta, test, 1) #subset bal_data but keep full len
 bal_dta.data = data_preparer.train_data
 bal_dta.targets = data_preparer.train_targets
 
-df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5', 
-                            'recall_1', 'recall_2', 'recall_3', 'recall_4', 'recall_5', 
-                            'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
-                            'auroc_1','auroc_2','auroc_3','auroc_4','auroc_5'])
+df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_4', 'f1_5', #'f1_3', 'f1_4', 'f1_5', 
+                            'recall_1', 'recall_2', 'recall_4', 'recall_5', #'recall_3', 'recall_4', 'recall_5', 
+                            'precision_1', 'precision_2', 'precision_4', 'precision_5', #'precision_3', 'precision_4', 'precision_5', 
+                            'auroc_1','auroc_2','auroc_4','auroc_5']) #'auroc_3','auroc_4','auroc_5'])
 for trial in range(1):
     end_time = time.time()
     print("Trial no {trial} Time Elapsed: ", end_time - start_time)
@@ -962,41 +962,41 @@ for trial in range(1):
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    SMOTE_data = Aug_SMOTE(train) #treatment3
-    end_time = time.time()
-    print("Time Elapsed: ", end_time - start_time)
+    # SMOTE_data = Aug_SMOTE(train) #treatment3
+    # end_time = time.time()
+    # print("Time Elapsed: ", end_time - start_time)
     
     Synth_data = Full_Synth(train,n_samples,configs_DDPM) #treatment4
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
-    treat1 = train_classifier(train,test,configs)
-    treat2 = train_classifier(aug_data,test,configs)
-    treat3 = train_classifier(SMOTE_data,test,configs, smote = True)
-    treat4 = train_classifier(Synth_data,test,configs)
-    treat5 = train_classifier(bal_dta,test,configs)
+    treat1 = train_classifier(train,test,configs, label = "unbalanced")
+    treat2 = train_classifier(aug_data,test,configs, label = "augmented")
+    #treat3 = train_classifier(SMOTE_data,test,configs, smote = True, "label" = "SMOTE")
+    treat4 = train_classifier(Synth_data,test,configs, label = "synth")
+    treat5 = train_classifier(bal_dta,test,configs, label = "balanced")
     end_time = time.time()
     print("Time Elapsed: ", end_time - start_time)
 
     row_data = {
     'f1_1' : treat1[0], 
     'f1_2' : treat2[0],
-    'f1_3' : treat3[0], 
+    #'f1_3' : treat3[0], 
     'f1_4' : treat4[0], 
     'f1_5' : treat5[0], 
     'recall_1' : treat1[1], 
     'recall_2' : treat2[1], 
-    'recall_3' : treat3[1], 
+    #'recall_3' : treat3[1], 
     'recall_4' : treat4[1], 
     'recall_5' : treat5[1], 
     'precision_1' : treat1[2], 
     'precision_2' : treat2[2], 
-    'precision_3' : treat3[2], 
+    #'precision_3' : treat3[2], 
     'precision_4' : treat4[2], 
     'precision_5' : treat5[2], 
     'auroc_1' : treat1[3],
     'auroc_2': treat2[3],
-    'auroc_3' : treat3[3],
+    #'auroc_3' : treat3[3],
     'auroc_4' : treat4[3],
     'auroc_5' : treat5[3]
     }
