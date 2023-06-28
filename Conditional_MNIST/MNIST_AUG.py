@@ -606,13 +606,13 @@ def train_classifier(train, test, configs, smote=False):
     return f1, recall, precision, auroc
 
 def Aug(train_data, prop_keep, configs, save_model = False, save_dir = './data/diffusion_outputs10/'):
-  n_epoch = configs['n_epoch']
-  batch_size = configs['batch_size']
-  n_T = configs['n_T']
-  n_classes = configs['n_classes']
-  n_feat = configs['n_feat']
-  lrate = configs['lrate']
-  w = configs['w']
+  n_epoch = configs_DDPM['n_epoch']
+  batch_size = configs_DDPM['batch_size']
+  n_T = configs_DDPM['n_T']
+  n_classes = configs_DDPM['n_classes']
+  n_feat = configs_DDPM['n_feat']
+  lrate = configs_DDPM['lrate']
+  w = configs_DDPM['w']
 
   n= len(train_data.data)
   n_gen = math.ceil((1 - prop_keep) * n)
@@ -932,6 +932,12 @@ train_classifier(train,test,configs)
 
 #dta = torchvision.datasets.MNIST('data/',train=True, download = False)
 bal_dta = torchvision.datasets.MNIST('data/',train=True, download = True) #make bal_data a torch dataset
+data_preparer = PrepareData(bal_dta, test, 1) #subset bal_data but keep full length
+train.data = data_preparer.train_data
+train.targets = data_preparer.train_targets
+test.data = data_preparer.test_data
+test.targets = data_preparer.test_targets
+
 df = pd.DataFrame(columns=['f1_1', 'f1_2', 'f1_3', 'f1_4', 'f1_5', 
                             'recall_1', 'recall_2', 'recall_3', 'recall_4', 'recall_5', 
                             'precision_1', 'precision_2', 'precision_3', 'precision_4', 'precision_5', 
