@@ -583,7 +583,7 @@ def train_classifier(train, test, configs, smote=False):
         #print(epoch)
     print(f'\rBest test acc {max(test_accs)}', end='\n', flush=True)
     print(confusion_mtxes[-1])
-    vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'])
+    vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], save_path="/local/scratch/cfikes/FHAI_3/Conditional_MNIST")
 
 
     # Calculate AUROC, f1, precision, recall
