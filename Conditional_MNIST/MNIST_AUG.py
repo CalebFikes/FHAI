@@ -885,34 +885,34 @@ def Aug_SMOTE(train):
 #train, test = unbalance_data(train,test,class0=3,class1=7,prop_keep=.5)
 
 # Modify the data
-data_preparer = PrepareData(train, test, .05)
-train.data = data_preparer.train_data
-train.targets = data_preparer.train_targets
-test.data = data_preparer.test_data
-test.targets = data_preparer.test_targets
+# data_preparer = PrepareData(train, test, .05)
+# train.data = data_preparer.train_data
+# train.targets = data_preparer.train_targets
+# test.data = data_preparer.test_data
+# test.targets = data_preparer.test_targets
 
-#print(torch.unique(train.targets, return_counts = True))
+# #print(torch.unique(train.targets, return_counts = True))
 
-end_time = time.time()
-print("Time Elapsed: ", end_time - start_time)
-augment = Aug(train, .1, configs_DDPM) #treatment2
-synth = Full_Synth(train,test,configs_DDPM) #treatment4
+# end_time = time.time()
+# print("Time Elapsed: ", end_time - start_time)
+# augment = Aug(train, .1, configs_DDPM) #treatment2
+# synth = Full_Synth(train,test,configs_DDPM) #treatment4
 
-end_time = time.time()
-print("Time Elapsed: ", end_time - start_time)
-train_classifier(augment,test,configs)
-print("ABOVE IS AUG")
+# end_time = time.time()
+# print("Time Elapsed: ", end_time - start_time)
+# train_classifier(augment,test,configs)
+# print("ABOVE IS AUG")
 
-end_time = time.time()
-print("Time Elapsed: ", end_time - start_time)
-train_classifier(synth,test,configs)
-print("ABOVE IS SYNTH")
-#train_classifier(Synth_data,test,configs)
+# end_time = time.time()
+# print("Time Elapsed: ", end_time - start_time)
+# train_classifier(synth,test,configs)
+# print("ABOVE IS SYNTH")
+# #train_classifier(Synth_data,test,configs)
 
-end_time = time.time()
-print("Time Elapsed: ", end_time - start_time)
-train_classifier(train,test,configs)
-print("ABOVE IS UNBALANCED")
+# end_time = time.time()
+# print("Time Elapsed: ", end_time - start_time)
+# train_classifier(train,test,configs)
+# print("ABOVE IS UNBALANCED")
 
 data_preparer = PrepareData(train, test, 1)
 train.data = data_preparer.train_data
