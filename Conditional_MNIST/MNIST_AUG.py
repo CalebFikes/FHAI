@@ -41,7 +41,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 30, 
+'n_epochs' : 20, 
 'batch_size_train' : 32, 
 'batch_size_test' : 1000, 
 'learning_rate' : 0.01, 
@@ -53,15 +53,26 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 50,
-    "batch_size" : 1024, 
+    'n_epoch' : 20,
+    "batch_size" : 64, 
     'n_T' : 100, 
     'device' : "cuda:0",
     'n_classes' : 10, 
     'n_feat' : 256, 
-    'lrate' : 1e-2,
-    'w' : .7
+    'lrate' : 5e-2,
+    'w' : .6
 }
+
+# configs_DDPM = {
+#     'n_epoch' : 50,
+#     "batch_size" : 1024, 
+#     'n_T' : 100, 
+#     'device' : "cuda:0",
+#     'n_classes' : 10, 
+#     'n_feat' : 256, 
+#     'lrate' : 1e-2,
+#     'w' : .7
+# }
 
 # Load datasets from torchvision datasets
 train=torchvision.datasets.MNIST('data/', train=True, download=True,
@@ -208,7 +219,7 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
         
 
-def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5), save_path=None):
+def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):#, save_path=None):
     cm = confusion_mtxes[np.argmax(test_accs)]
     cm_sum = np.sum(cm, axis=1, keepdims=True)
     cm_perc = cm / cm_sum * 100
@@ -244,8 +255,8 @@ def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5), save_pat
     plt.subplot(1, 3, 3)
     sns.heatmap(cm_df, annot=annot, fmt='', cmap="Blues")
 
-    if save_path:
-        plt.savefig(save_path, dpi=300)
+    # if save_path:
+    #     plt.savefig(save_path, dpi=300)
 
     plt.show()
     return fig
@@ -517,7 +528,7 @@ class DDPM(nn.Module):
         x_i_store = np.array(x_i_store)
         return x_i, x_i_store
     
-def train_classifier(train, test, configs, label, smote=False):
+def train_classifier(train, test, configs, smote=False):
     torch.backends.cudnn.enabled = False
 
     # Define train loader and test loader
@@ -869,12 +880,12 @@ def Aug_SMOTE(train):
 
 #=========================================================================
 
-"""
+
 ##############TUNING###############
 #train, test = unbalance_data(train,test,class0=3,class1=7,prop_keep=.5)
 
 # Modify the data
-data_preparer = PrepareData(train, test, .1)
+data_preparer = PrepareData(train, test, .05)
 train.data = data_preparer.train_data
 train.targets = data_preparer.train_targets
 test.data = data_preparer.test_data
@@ -884,17 +895,40 @@ test.targets = data_preparer.test_targets
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
-aug_data = Aug(train, 1, configs_DDPM) #treatment2
-#Synth_data = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
+augment = Aug(train, .1, configs_DDPM) #treatment2
+synth = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
+
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
+train_classifier(augment,test,configs)
+print("ABOVE IS AUG")
+
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
+train_classifier(synth,test,configs)
+print("ABOVE IS SYNTH")
+#train_classifier(Synth_data,test,configs)
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
 train_classifier(train,test,configs)
-"""
+print("ABOVE IS UNBALANCED")
+
+data_preparer = PrepareData(train, test, 1)
+train.data = data_preparer.train_data
+train.targets = data_preparer.train_targets
+test.data = data_preparer.test_data
+test.targets = data_preparer.test_targets
+
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
+train_classifier(train,test,configs)
+print("ABOVE IS BALANCED")
 
 
 
 #dta = torchvision.datasets.MNIST('data/',train=True, download = False)
+"""
 bal_dta = torchvision.datasets.MNIST('data/',train=True, download = True) #make bal_data a torch dataset
 data_preparer = PrepareData(bal_dta, test, 1) #subset bal_data but keep full length
 bal_dta.data = data_preparer.train_data
@@ -967,6 +1001,7 @@ for trial in range(1):
     df.to_csv('Exp_Log.csv', index=False)
 
     torch.cuda.empty_cache()
+"""
 
 
 
