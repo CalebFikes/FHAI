@@ -53,7 +53,7 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 10,
+    'n_epoch' : 20,
     "batch_size" : 64, 
     'n_T' : 100, 
     'device' : "cuda:0",
@@ -62,6 +62,17 @@ configs_DDPM = {
     'lrate' : 5e-2,
     'w' : .6
 }
+
+# configs_DDPM = {
+#     'n_epoch' : 50,
+#     "batch_size" : 1024, 
+#     'n_T' : 100, 
+#     'device' : "cuda:0",
+#     'n_classes' : 10, 
+#     'n_feat' : 256, 
+#     'lrate' : 1e-2,
+#     'w' : .7
+# }
 
 # Load datasets from torchvision datasets
 train=torchvision.datasets.MNIST('data/', train=True, download=True,
@@ -889,7 +900,7 @@ aug_data = Aug(train, 1, configs_DDPM) #treatment2
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
-train_classifier(aug_data,test,configs)
+train_classifier(train,test,configs)
 #train_classifier(Synth_data,test,configs)
 
 
