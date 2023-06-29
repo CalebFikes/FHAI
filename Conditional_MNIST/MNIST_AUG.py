@@ -895,7 +895,7 @@ test.targets = data_preparer.test_targets
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
-augment = Aug(train, .1, configs_DDPM) #treatment2
+augment = Aug(train, .05, configs_DDPM) #treatment2
 synth = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
 
 end_time = time.time()
@@ -903,27 +903,27 @@ print("Time Elapsed: ", end_time - start_time)
 train_classifier(augment,test,configs)
 print("ABOVE IS AUG")
 
-end_time = time.time()
-print("Time Elapsed: ", end_time - start_time)
-train_classifier(synth,test,configs)
-print("ABOVE IS SYNTH")
-#train_classifier(Synth_data,test,configs)
+# end_time = time.time()
+# print("Time Elapsed: ", end_time - start_time)
+# train_classifier(synth,test,configs)
+# print("ABOVE IS SYNTH")
+# #train_classifier(Synth_data,test,configs)
 
-end_time = time.time()
-print("Time Elapsed: ", end_time - start_time)
-train_classifier(train,test,configs)
-print("ABOVE IS UNBALANCED")
+# end_time = time.time()
+# print("Time Elapsed: ", end_time - start_time)
+# train_classifier(train,test,configs)
+# print("ABOVE IS UNBALANCED")
 
-data_preparer = PrepareData(train, test, 1)
-train.data = data_preparer.train_data
-train.targets = data_preparer.train_targets
-test.data = data_preparer.test_data
-test.targets = data_preparer.test_targets
+# data_preparer = PrepareData(train, test, 1)
+# train.data = data_preparer.train_data
+# train.targets = data_preparer.train_targets
+# test.data = data_preparer.test_data
+# test.targets = data_preparer.test_targets
 
-end_time = time.time()
-print("Time Elapsed: ", end_time - start_time)
-train_classifier(train,test,configs)
-print("ABOVE IS BALANCED")
+# end_time = time.time()
+# print("Time Elapsed: ", end_time - start_time)
+# train_classifier(train,test,configs)
+# print("ABOVE IS BALANCED")
 
 
 
