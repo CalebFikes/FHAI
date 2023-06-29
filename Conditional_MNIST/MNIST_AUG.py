@@ -53,7 +53,7 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 20,
+    'n_epoch' : 50,
     "batch_size" : 64, 
     'n_T' : 100, 
     'device' : "cuda:0",
@@ -895,12 +895,18 @@ test.targets = data_preparer.test_targets
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
-#train = Aug(train, 1, configs_DDPM) #treatment2
-train = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
+augment = Aug(train, 1, configs_DDPM) #treatment2
+synth = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
-train_classifier(train,test,configs)
+train_classifier(augment,test,configs)
+print("ABOVE IS AUG")
+
+end_time = time.time()
+print("Time Elapsed: ", end_time - start_time)
+train_classifier(synth,test,configs)
+print("ABOVE IS SYNTH")
 #train_classifier(Synth_data,test,configs)
 
 
