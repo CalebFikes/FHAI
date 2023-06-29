@@ -885,7 +885,7 @@ def Aug_SMOTE(train):
 #train, test = unbalance_data(train,test,class0=3,class1=7,prop_keep=.5)
 
 # Modify the data
-data_preparer = PrepareData(train, test, .1)
+data_preparer = PrepareData(train, test, .05)
 train.data = data_preparer.train_data
 train.targets = data_preparer.train_targets
 test.data = data_preparer.test_data
@@ -896,7 +896,7 @@ test.targets = data_preparer.test_targets
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
 augment = Aug(train, .1, configs_DDPM) #treatment2
-synth = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
+synth = Full_Synth(train,test,configs_DDPM) #treatment4
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
