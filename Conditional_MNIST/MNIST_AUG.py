@@ -53,14 +53,14 @@ configs = {
 }
 
 configs_DDPM = {
-    'n_epoch' : 50,
-    "batch_size" : 1024, 
+    'n_epoch' : 10,
+    "batch_size" : 64, 
     'n_T' : 100, 
     'device' : "cuda:0",
     'n_classes' : 10, 
     'n_feat' : 256, 
-    'lrate' : 1e-2,
-    'w' : .7
+    'lrate' : 5e-2,
+    'w' : .6
 }
 
 # Load datasets from torchvision datasets
