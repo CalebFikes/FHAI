@@ -41,7 +41,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # configs
 configs = {
-'n_epochs' : 30, 
+'n_epochs' : 20, 
 'batch_size_train' : 32, 
 'batch_size_test' : 1000, 
 'learning_rate' : 0.01, 
@@ -208,7 +208,7 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
         
 
-def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5), save_path=None):
+def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5)):#, save_path=None):
     cm = confusion_mtxes[np.argmax(test_accs)]
     cm_sum = np.sum(cm, axis=1, keepdims=True)
     cm_perc = cm / cm_sum * 100
@@ -244,8 +244,8 @@ def vis(train_loss, test_accs, confusion_mtxes, labels, figsize=(7, 5), save_pat
     plt.subplot(1, 3, 3)
     sns.heatmap(cm_df, annot=annot, fmt='', cmap="Blues")
 
-    if save_path:
-        plt.savefig(save_path, dpi=300)
+    # if save_path:
+    #     plt.savefig(save_path, dpi=300)
 
     plt.show()
     return fig
@@ -517,7 +517,7 @@ class DDPM(nn.Module):
         x_i_store = np.array(x_i_store)
         return x_i, x_i_store
     
-def train_classifier(train, test, configs, label, smote=False):
+def train_classifier(train, test, configs, smote=False):
     torch.backends.cudnn.enabled = False
 
     # Define train loader and test loader
@@ -584,7 +584,7 @@ def train_classifier(train, test, configs, label, smote=False):
     print(f'\rBest test acc {max(test_accs)}', end='\n', flush=True)
     print(confusion_mtxes[-1])
     #save_path = f"/local/scratch/cfikes/FHAI_3/Conditional_MNIST/{label}.png"
-    #vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], save_path=save_path)
+    vis(train_loss, test_accs, confusion_mtxes, configs['class_labels'], save_path=save_path)
 
 
     # Calculate AUROC, f1, precision, recall
