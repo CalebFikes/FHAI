@@ -896,7 +896,7 @@ test.targets = data_preparer.test_targets
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
 augment = Aug(train, .05, configs_DDPM) #treatment2
-synth = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
+#synth = Full_Synth(train,len(train.targets),configs_DDPM) #treatment4
 
 end_time = time.time()
 print("Time Elapsed: ", end_time - start_time)
