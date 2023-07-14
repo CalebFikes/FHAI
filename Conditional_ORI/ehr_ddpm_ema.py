@@ -320,11 +320,7 @@ class LogisticRegression(torch.nn.Module):
          outputs = torch.sigmoid(self.linear(x))
          return outputs
 
-from google.colab import drive
-drive.mount('/content/drive')
-
-filename = '/content/drive/My Drive/data-ori.csv'
-data = pd.read_csv(filename)
+data = pd.read_csv('data-ori.csv')
 data['SOURCE'] = data.SOURCE.replace({"in":1, 'out':0})
 
 
