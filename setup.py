@@ -9,5 +9,5 @@ setup(
     author=‘CalebFikes’,
     author_email=‘cjf6@rice.edu’,
     description='',
-    install_requires=['torch', 'torchvision', 'hessQuik>=0.0.2', 'matplotlib', 'numpy', 'scikit-learn']
+    install_requires=['torch', 'torchvision', 'matplotlib', 'numpy', 'scikit-learn']
 )
