@@ -406,10 +406,6 @@ def ema(source, target, decay):
             source_dict[key].data * (1 - decay))
 
 
-# # optionally load a model
-# # ddpm.load_state_dict(torch.load("./data/diffusion_outputs/ddpm_unet01_mnist_9.pth"))
-
-
 optimizer = torch.optim.SGD(ddpm.parameters(), 0.01, 0.7)
 pbar = tqdm(dataloader)
 loss_ema = True
@@ -456,6 +452,9 @@ for i, c in enumerate(num_feat):
     f = x[[c]].plot(kind='kde',color='#D7191C', linestyle='--', ax=axes[i])
     axes[i].legend([f'{c} - Generated', f'{c} - Original'])
     axes[i].set_title(f'Generated and Original Comparision of {c}')
+print(fig)
+print(axes)
+plt.show()
 
 ddpm_ema.eval()
 
@@ -485,17 +484,7 @@ for i, c in enumerate(num_feat):
     axes[i].legend([f'{c} - Generated(Inpatient Care)', f'{c} - Original(Inpatient Care)',
                     f'{c} - Generated(Outpatient Care)', f'{c} - Original(Outpatient Care)'])
     axes[i].set_title(f'Generated and Original Comparison of {c} by Class')
+plt.show()
 
-"""#### Plot 3: UMAP of datasets after augmentation"""
-
-umap_2d = UMAP(n_components=2, init='random', random_state=0)
-proj_2d = umap_2d.fit_transform(x_train)
-
-fig_2d = px.scatter(
-    proj_2d, x=0, y=1,
-    color= y_train.numpy().astype(str), labels={'color': 'Treatment'}, width=800, height=400,
-    title='Manifold Projection of Augmented Dataset'
-    )
-fig_2d.show()
-fig_2d.write_image("images/augmented_bal_ds_manifold.png")
-print(fig_2d)
+print(fig)
+print(axes)
