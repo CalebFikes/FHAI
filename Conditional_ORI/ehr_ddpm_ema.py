@@ -26,15 +26,11 @@ https://arxiv.org/abs/2205.11487
 from typing import Dict, Tuple
 from tqdm import tqdm
 import torch
-import seaborn as sns
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import models, transforms
-from torchvision.datasets import MNIST
-from torchvision.utils import save_image, make_grid
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation, PillowWriter
 import numpy as np
 import torchvision
 import random
@@ -42,9 +38,17 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import Dataset
-from sklearn.metrics import f1_score, roc_auc_score, accuracy_score,roc_curve
-from umap import UMAP
-import plotly.express as px
+
+import torch
+from torch import nn
+import copy
+
+from copy import deepcopy
+from collections import OrderedDict
+from sys import stderr
+
+# for type hint
+from torch import Tensor
 
 class ResidualConvBlock(nn.Module):
     def __init__(
@@ -366,16 +370,6 @@ v, c
 
 """###Train DDPM"""
 
-import torch
-from torch import nn
-import copy
-
-from copy import deepcopy
-from collections import OrderedDict
-from sys import stderr
-
-# for type hint
-from torch import Tensor
 
 n_epoch = 10000
 batch_size = 16
